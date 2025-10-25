@@ -25,12 +25,12 @@ var JSSetupPrettierCmd = &cobra.Command{
 	Long:  "Set up Prettier code formatter with a default configuration file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Installing Prettier...")
-		
+
 		// Install prettier
 		installCmd := exec.Command("npm", "install", "--save-dev", "prettier")
 		installCmd.Stdout = cmd.OutOrStdout()
 		installCmd.Stderr = cmd.ErrOrStderr()
-		
+
 		if err := installCmd.Run(); err != nil {
 			return fmt.Errorf("failed to install Prettier: %w", err)
 		}
@@ -85,11 +85,11 @@ var JSPrettyCmd = &cobra.Command{
 	Long:  "Format JavaScript/TypeScript files using Prettier",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Running Prettier...")
-		
+
 		command := exec.Command("npx", "prettier", "--write", ".")
 		command.Stdout = cmd.OutOrStdout()
 		command.Stderr = cmd.ErrOrStderr()
-		
+
 		if err := command.Run(); err != nil {
 			return fmt.Errorf("failed to run Prettier: %w", err)
 		}

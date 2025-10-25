@@ -84,12 +84,12 @@ echo "✅ Tests completed!"
 			if err := utils.WriteFile(filename, content); err != nil {
 				return fmt.Errorf("failed to write %s: %w", filename, err)
 			}
-			
+
 			// Make scripts executable
 			if err := os.Chmod(filename, 0755); err != nil {
 				return fmt.Errorf("failed to make %s executable: %w", filename, err)
 			}
-			
+
 			fmt.Printf("✅ Created %s\n", filename)
 		}
 

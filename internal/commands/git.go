@@ -25,7 +25,7 @@ var GitPruneStaleCmd = &cobra.Command{
 	Long:  "Remove local Git branches that no longer exist on the remote repository",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Fetching remote branches...")
-		
+
 		// Fetch with prune
 		fetchCmd := exec.Command("git", "fetch", "--prune")
 		if output, err := fetchCmd.CombinedOutput(); err != nil {
@@ -54,7 +54,7 @@ var GitPruneStaleCmd = &cobra.Command{
 		for _, branch := range localBranches {
 			branch = strings.TrimSpace(branch)
 			branch = strings.TrimPrefix(branch, "* ")
-			
+
 			if branch == "" || branch == currentBranch || branch == "main" || branch == "master" {
 				continue
 			}
@@ -83,7 +83,7 @@ var GitPruneStaleCmd = &cobra.Command{
 		} else {
 			fmt.Printf("✅ Deleted %d stale branch(es)!\n", deletedCount)
 		}
-		
+
 		return nil
 	},
 }

@@ -16,10 +16,10 @@ var DNSClearCmd = &cobra.Command{
 	Long:  "Clear the DNS cache for your operating system to resolve DNS issues",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		os := runtime.GOOS
-		
+
 		var cmdStr string
 		var cmdArgs []string
-		
+
 		switch os {
 		case "darwin": // macOS
 			fmt.Println("Clearing DNS cache on macOS...")
@@ -37,7 +37,7 @@ var DNSClearCmd = &cobra.Command{
 		default:
 			return fmt.Errorf("unsupported operating system: %s", os)
 		}
-		
+
 		command := exec.Command(cmdStr, cmdArgs...)
 		output, err := command.CombinedOutput()
 		if err != nil {
@@ -53,7 +53,7 @@ var DNSClearCmd = &cobra.Command{
 				return fmt.Errorf("failed to clear DNS cache: %w\nOutput: %s", err, string(output))
 			}
 		}
-		
+
 		fmt.Println("✅ DNS cache cleared successfully!")
 		if len(output) > 0 {
 			fmt.Println(string(output))
@@ -69,17 +69,17 @@ var CreateKeystoreCmd = &cobra.Command{
 	Long:  "Create a new Java keystore file for Android app signing",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("🔐 Creating Android Keystore...")
-		
+
 		alias, err := utils.PromptInput("Enter key alias: ")
 		if err != nil {
 			return err
 		}
-		
+
 		keystoreName, err := utils.PromptInput("Enter keystore filename (e.g., my-release-key.jks): ")
 		if err != nil {
 			return err
 		}
-		
+
 		validity, err := utils.PromptInput("Enter validity in days (default: 10000): ")
 		if err != nil {
 			return err
@@ -87,9 +87,9 @@ var CreateKeystoreCmd = &cobra.Command{
 		if validity == "" {
 			validity = "10000"
 		}
-		
+
 		fmt.Println("\nGenerating keystore...")
-		
+
 		// Build keytool command
 		command := exec.Command("keytool",
 			"-genkeypair",
@@ -101,15 +101,15 @@ var CreateKeystoreCmd = &cobra.Command{
 			"-alias", alias,
 			"-keystore", keystoreName,
 		)
-		
+
 		command.Stdout = cmd.OutOrStdout()
 		command.Stderr = cmd.ErrOrStderr()
 		command.Stdin = cmd.InOrStdin()
-		
+
 		if err := command.Run(); err != nil {
 			return fmt.Errorf("failed to create keystore: %w", err)
 		}
-		
+
 		fmt.Printf("\n✅ Keystore '%s' created successfully!\n", keystoreName)
 		return nil
 	},

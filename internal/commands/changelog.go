@@ -138,7 +138,7 @@ var ChangelogRecordCmd = &cobra.Command{
 
 func init() {
 	ChangelogRecordCmd.Flags().BoolP("wip", "w", false, "Mark version as Work In Progress")
-	
+
 	ChangelogCmd.AddCommand(ChangelogCreateCmd)
 	ChangelogCmd.AddCommand(ChangelogRecordCmd)
 }

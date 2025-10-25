@@ -16,7 +16,7 @@ var EditorConfigCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		force, _ := cmd.Flags().GetBool("force")
-		
+
 		if utils.FileExists(".editorconfig") && !force {
 			return fmt.Errorf(".editorconfig already exists. Use --force to overwrite")
 		}
@@ -128,32 +128,32 @@ var FormatCmd = &cobra.Command{
 
 func formatCode(language string) error {
 	var cmd *exec.Cmd
-	
+
 	switch language {
 	case "go", "golang":
 		fmt.Println("Formatting Go code with gofmt...")
 		cmd = exec.Command("gofmt", "-w", ".")
-		
+
 	case "javascript", "js":
 		fmt.Println("Formatting JavaScript with prettier...")
 		cmd = exec.Command("npx", "prettier", "--write", "**/*.js")
-		
+
 	case "typescript", "ts":
 		fmt.Println("Formatting TypeScript with prettier...")
 		cmd = exec.Command("npx", "prettier", "--write", "**/*.ts")
-		
+
 	case "python", "py":
 		fmt.Println("Formatting Python with black...")
 		cmd = exec.Command("black", ".")
-		
+
 	case "php":
 		fmt.Println("Formatting PHP with php-cs-fixer...")
 		cmd = exec.Command("php-cs-fixer", "fix", ".")
-		
+
 	case "dart", "flutter":
 		fmt.Println("Formatting Dart with dart format...")
 		cmd = exec.Command("dart", "format", ".")
-		
+
 	default:
 		return fmt.Errorf("unsupported language: %s", language)
 	}

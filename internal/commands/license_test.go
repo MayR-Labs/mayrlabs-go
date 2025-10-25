@@ -73,8 +73,8 @@ func TestGenerateLicense(t *testing.T) {
 }
 
 func containsString(s, substr string) bool {
-	return len(s) >= len(substr) && 
-		(s == substr || 
-		 len(s) > len(substr) && 
-		 (s[:len(substr)] == substr || containsString(s[1:], substr)))
+	return len(s) >= len(substr) &&
+		(s == substr ||
+			len(s) > len(substr) &&
+				(s[:len(substr)] == substr || containsString(s[1:], substr)))
 }

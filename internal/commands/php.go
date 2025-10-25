@@ -24,11 +24,11 @@ var PHPCSFixCmd = &cobra.Command{
 	Long:  "Fix PHP code style issues using PHP-CS-Fixer",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Running PHP-CS-Fixer...")
-		
+
 		command := exec.Command("php-cs-fixer", "fix", ".")
 		command.Stdout = cmd.OutOrStdout()
 		command.Stderr = cmd.ErrOrStderr()
-		
+
 		if err := command.Run(); err != nil {
 			return fmt.Errorf("failed to run PHP-CS-Fixer: %w", err)
 		}
@@ -45,13 +45,13 @@ var PHPLintCmd = &cobra.Command{
 	Long:  "Check PHP files for syntax errors",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Linting PHP files...")
-		
+
 		// Use find and php -l to check syntax
 		command := exec.Command("sh", "-c", "find . -name '*.php' -exec php -l {} \\;")
 		output, err := command.CombinedOutput()
-		
+
 		fmt.Println(string(output))
-		
+
 		if err != nil {
 			return fmt.Errorf("PHP linting failed: %w", err)
 		}

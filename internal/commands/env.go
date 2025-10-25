@@ -48,7 +48,7 @@ var EnvUpdateExampleCmd = &cobra.Command{
 
 		for _, line := range lines {
 			line = strings.TrimSpace(line)
-			
+
 			// Keep comments and empty lines
 			if line == "" || strings.HasPrefix(line, "#") {
 				exampleLines = append(exampleLines, line)
@@ -187,7 +187,7 @@ var EnvArrangeCmd = &cobra.Command{
 				key := parts[0]
 				value := parts[1]
 				prefix := "OTHER"
-				
+
 				// Extract prefix (e.g., APP_ from APP_NAME)
 				if idx := strings.Index(key, "_"); idx > 0 {
 					prefix = key[:idx]
@@ -212,7 +212,7 @@ var EnvArrangeCmd = &cobra.Command{
 
 		// Build output
 		var output []string
-		
+
 		// Add comments at the top
 		if len(comments) > 0 {
 			output = append(output, comments...)

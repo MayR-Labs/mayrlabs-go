@@ -54,15 +54,15 @@ func generateCI(lang, vcs string) error {
 	case "github":
 		content = generateGitHubActions(lang)
 		filePath = ".github/workflows/ci.yml"
-		
+
 	case "gitlab":
 		content = generateGitLabCI(lang)
 		filePath = ".gitlab-ci.yml"
-		
+
 	case "circleci":
 		content = generateCircleCI(lang)
 		filePath = ".circleci/config.yml"
-		
+
 	default:
 		return fmt.Errorf("unsupported VCS: %s", vcs)
 	}

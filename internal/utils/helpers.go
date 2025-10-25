@@ -43,7 +43,7 @@ func FileExists(path string) bool {
 // HashString generates a hash of the input string using the specified algorithm
 func HashString(input, algorithm string) (string, error) {
 	var hash []byte
-	
+
 	switch strings.ToLower(algorithm) {
 	case "md5":
 		h := md5.Sum([]byte(input))
@@ -57,14 +57,14 @@ func HashString(input, algorithm string) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported algorithm: %s", algorithm)
 	}
-	
+
 	return hex.EncodeToString(hash), nil
 }
 
 // GeneratePassword generates a random password of the specified length
 func GeneratePassword(length int) (string, error) {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?"
-	
+
 	password := make([]byte, length)
 	for i := range password {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
@@ -73,7 +73,7 @@ func GeneratePassword(length int) (string, error) {
 		}
 		password[i] = charset[num.Int64()]
 	}
-	
+
 	return string(password), nil
 }
 
