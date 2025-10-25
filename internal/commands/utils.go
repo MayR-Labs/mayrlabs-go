@@ -21,6 +21,8 @@ var UUIDCmd = &cobra.Command{
 }
 
 // PasswordCmd generates a random password
+// Note: The password is intentionally printed to stdout for the user.
+// Users should handle the output securely and avoid logging it.
 var PasswordCmd = &cobra.Command{
 	Use:   "password [length]",
 	Short: "Generate a random password of specified length (default: 16)",
@@ -45,6 +47,8 @@ var PasswordCmd = &cobra.Command{
 			return fmt.Errorf("failed to generate password: %w", err)
 		}
 
+		// Print password to stdout - this is the intended behavior
+		// Users should copy and store this securely
 		fmt.Println(password)
 		return nil
 	},
