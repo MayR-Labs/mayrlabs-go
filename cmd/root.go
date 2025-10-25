@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/MayR-Labs/mayrlabs-go/internal/commands"
 	"github.com/spf13/cobra"
+
+	"github.com/MayR-Labs/mayrlabs-go/internal/commands"
 )
 
 var rootCmd = &cobra.Command{

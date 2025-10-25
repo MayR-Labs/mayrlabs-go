@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 )
 
 // ChangelogCmd is the parent command for changelog operations
@@ -14,7 +15,7 @@ var ChangelogCmd = &cobra.Command{
 	Short: "Changelog management commands",
 	Long:  "Commands for creating and managing CHANGELOG.md files",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
@@ -24,7 +25,10 @@ var ChangelogCreateCmd = &cobra.Command{
 	Short: "Create or overwrite CHANGELOG.md",
 	Long:  "Initialize a new CHANGELOG.md file following Keep a Changelog format",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		force, _ := cmd.Flags().GetBool("force")
+		force, err := cmd.Flags().GetBool("force")
+		if err != nil {
+			return err
+		}
 
 		if utils.FileExists("CHANGELOG.md") && !force {
 			return fmt.Errorf("CHANGELOG.md already exists. Use --force to overwrite")
@@ -75,7 +79,10 @@ var ChangelogRecordCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		version := args[0]
 		summary := args[1]
-		wip, _ := cmd.Flags().GetBool("wip")
+		wip, err := cmd.Flags().GetBool("wip")
+		if err != nil {
+			return err
+		}
 
 		if !utils.FileExists("CHANGELOG.md") {
 			return fmt.Errorf("CHANGELOG.md does not exist. Run 'mayrlabs changelog create' first")

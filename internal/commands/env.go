@@ -16,7 +16,7 @@ var EnvCmd = &cobra.Command{
 	Short: "Environment file management commands",
 	Long:  "Commands for managing .env files, validating variables, and syncing examples",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 

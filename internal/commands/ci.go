@@ -5,8 +5,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
+)
+
+const (
+	langGo         = "golang"
+	langJavaScript = "javascript"
+	langPython     = "python"
+	langDart       = "dart"
+	langPHP        = "php"
 )
 
 // CICmd generates CI/CD workflow files
@@ -15,8 +24,14 @@ var CICmd = &cobra.Command{
 	Short: "Generate CI/CD workflow YAML for your language and VCS",
 	Long:  "Create CI/CD configuration files for GitHub Actions, GitLab CI, or other platforms",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		lang, _ := cmd.Flags().GetString("lang")
-		vcs, _ := cmd.Flags().GetString("vcs")
+		lang, err := cmd.Flags().GetString("lang")
+		if err != nil {
+			return err
+		}
+		vcs, err := cmd.Flags().GetString("vcs")
+		if err != nil {
+			return err
+		}
 
 		// Prompt for missing values
 		if lang == "" {
@@ -70,7 +85,7 @@ func generateCI(lang, vcs string) error {
 	// Create directory if needed
 	dir := filepath.Dir(filePath)
 	if dir != "." {
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
@@ -86,7 +101,7 @@ func generateCI(lang, vcs string) error {
 
 func generateGitHubActions(lang string) string {
 	switch lang {
-	case "go", "golang":
+	case "go", langGo:
 		return `name: Go CI
 
 on:
@@ -121,7 +136,7 @@ jobs:
         version: latest
 `
 
-	case "javascript", "js", "node":
+	case langJavaScript, "js", "node":
 		return `name: Node.js CI
 
 on:
@@ -155,7 +170,7 @@ jobs:
       run: npm run build --if-present
 `
 
-	case "python", "py":
+	case langPython, "py":
 		return `name: Python CI
 
 on:
@@ -193,7 +208,7 @@ jobs:
         flake8 .
 `
 
-	case "flutter", "dart":
+	case "flutter", langDart:
 		return `name: Flutter CI
 
 on:
@@ -226,7 +241,7 @@ jobs:
       run: flutter build apk --release
 `
 
-	case "php":
+	case langPHP:
 		return `name: PHP CI
 
 on:
@@ -283,7 +298,7 @@ jobs:
 
 func generateGitLabCI(lang string) string {
 	switch lang {
-	case "go", "golang":
+	case "go", langGo:
 		return `image: golang:1.21
 
 stages:
@@ -304,7 +319,7 @@ build:
       - ./
 `
 
-	case "javascript", "js", "node":
+	case langJavaScript, "js", "node":
 		return `image: node:18
 
 stages:

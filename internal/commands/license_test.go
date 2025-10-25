@@ -7,11 +7,11 @@ import (
 func TestGenerateLicense(t *testing.T) {
 	tests := []struct {
 		name        string
+		wantContain string
 		licenseType string
 		author      string
 		year        string
 		wantErr     bool
-		wantContain string
 	}{
 		{
 			name:        "MIT License",

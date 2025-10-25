@@ -15,7 +15,10 @@ var EditorConfigCmd = &cobra.Command{
 	Long:  "Create an .editorconfig file with best practices for the specified language",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		force, _ := cmd.Flags().GetBool("force")
+		force, err := cmd.Flags().GetBool("force")
+		if err != nil {
+			return err
+		}
 
 		if utils.FileExists(".editorconfig") && !force {
 			return fmt.Errorf(".editorconfig already exists. Use --force to overwrite")

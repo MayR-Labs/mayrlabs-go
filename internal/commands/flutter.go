@@ -14,7 +14,7 @@ var FlutterCmd = &cobra.Command{
 	Short: "Flutter-related commands",
 	Long:  "Commands for managing Flutter projects and build scripts",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
@@ -25,7 +25,7 @@ var FlutterCreateScriptsCmd = &cobra.Command{
 	Long:  "Generate shell scripts for building Flutter apps for various platforms",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Create scripts directory
-		if err := os.MkdirAll("scripts", 0755); err != nil {
+		if err := os.MkdirAll("scripts", 0o755); err != nil {
 			return fmt.Errorf("failed to create scripts directory: %w", err)
 		}
 
@@ -86,7 +86,7 @@ echo "✅ Tests completed!"
 			}
 
 			// Make scripts executable
-			if err := os.Chmod(filename, 0755); err != nil {
+			if err := os.Chmod(filename, 0o755); err != nil {
 				return fmt.Errorf("failed to make %s executable: %w", filename, err)
 			}
 

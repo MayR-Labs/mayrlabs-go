@@ -2,9 +2,9 @@ package utils
 
 import (
 	"bufio"
-	"crypto/md5"
+	"crypto/md5" // #nosec G501 - MD5 is intentionally supported for user choice in hash command
 	"crypto/rand"
-	"crypto/sha1"
+	"crypto/sha1" // #nosec G505 - SHA1 is intentionally supported for user choice in hash command
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -40,16 +40,18 @@ func FileExists(path string) bool {
 	return err == nil
 }
 
-// HashString generates a hash of the input string using the specified algorithm
+// HashString generates a hash of the input string using the specified algorithm.
+// MD5 and SHA1 are supported for legacy compatibility but SHA256 is recommended.
+// #nosec G401 - MD5/SHA1 are intentionally supported as user options
 func HashString(input, algorithm string) (string, error) {
 	var hash []byte
 
 	switch strings.ToLower(algorithm) {
 	case "md5":
-		h := md5.Sum([]byte(input))
+		h := md5.Sum([]byte(input)) // #nosec G401
 		hash = h[:]
 	case "sha1":
-		h := sha1.Sum([]byte(input))
+		h := sha1.Sum([]byte(input)) // #nosec G401
 		hash = h[:]
 	case "sha256":
 		h := sha256.Sum256([]byte(input))
@@ -77,9 +79,10 @@ func GeneratePassword(length int) (string, error) {
 	return string(password), nil
 }
 
-// WriteFile writes content to a file with proper error handling
+// WriteFile writes content to a file with proper error handling.
+// Uses 0600 permissions for security (owner read/write only).
 func WriteFile(path, content string) error {
-	return os.WriteFile(path, []byte(content), 0644)
+	return os.WriteFile(path, []byte(content), 0o600)
 }
 
 // ReadFile reads content from a file

@@ -32,6 +32,8 @@ var QuoteCmd = &cobra.Command{
 	Short: "Display a random motivational quote for developers",
 	Long:  "Get inspired with a random motivational quote from famous developers and thinkers",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Using math/rand is acceptable for non-security quote selection
+		// #nosec G404
 		rand.Seed(time.Now().UnixNano())
 		quote := quotes[rand.Intn(len(quotes))]
 		fmt.Println("\n✨ " + quote + "\n")

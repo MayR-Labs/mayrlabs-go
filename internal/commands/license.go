@@ -14,10 +14,22 @@ var AddLicenseCmd = &cobra.Command{
 	Short: "Create a LICENSE file based on selected type, year, and author",
 	Long:  "Generate a LICENSE file for your project with popular open source licenses",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		licenseType, _ := cmd.Flags().GetString("type")
-		author, _ := cmd.Flags().GetString("author")
-		year, _ := cmd.Flags().GetString("year")
-		force, _ := cmd.Flags().GetBool("force")
+		licenseType, err := cmd.Flags().GetString("type")
+		if err != nil {
+			return err
+		}
+		author, err := cmd.Flags().GetString("author")
+		if err != nil {
+			return err
+		}
+		year, err := cmd.Flags().GetString("year")
+		if err != nil {
+			return err
+		}
+		force, err := cmd.Flags().GetBool("force")
+		if err != nil {
+			return err
+		}
 
 		// Check if LICENSE already exists
 		if utils.FileExists("LICENSE") && !force {

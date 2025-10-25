@@ -60,7 +60,7 @@ var GitPruneStaleCmd = &cobra.Command{
 			}
 
 			// Check if branch exists on remote
-			remoteCmd := exec.Command("git", "branch", "-r", "--list", fmt.Sprintf("origin/%s", branch))
+			remoteCmd := exec.Command("git", "branch", "-r", "--list", fmt.Sprintf("origin/%s", branch)) // #nosec G204
 			remoteOutput, err := remoteCmd.Output()
 			if err != nil {
 				continue
