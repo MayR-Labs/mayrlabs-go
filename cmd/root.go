@@ -18,7 +18,7 @@ formatting code, managing environments, handling CI/CD, and keeping
 project structure consistent — all in seconds.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			cmd.Help()
+			_ = cmd.Help()
 		}
 	},
 }

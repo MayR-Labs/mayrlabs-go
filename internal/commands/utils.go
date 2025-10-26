@@ -61,7 +61,10 @@ var HashCmd = &cobra.Command{
 	Long:  "Generate a hash of the provided string using the specified algorithm",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		algorithm, _ := cmd.Flags().GetString("algorithm")
+		algorithm, err := cmd.Flags().GetString("algorithm")
+		if err != nil {
+			return err
+		}
 		if algorithm == "" {
 			algorithm = "sha256"
 		}

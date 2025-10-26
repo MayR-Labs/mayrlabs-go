@@ -16,6 +16,7 @@ const (
 	langPython     = "python"
 	langDart       = "dart"
 	langPHP        = "php"
+	langFlutter    = "flutter"
 )
 
 // CICmd generates CI/CD workflow files
@@ -208,7 +209,7 @@ jobs:
         flake8 .
 `
 
-	case "flutter", langDart:
+	case langFlutter, langDart:
 		return `name: Flutter CI
 
 on:

@@ -39,7 +39,6 @@ var AddLicenseCmd = &cobra.Command{
 		// Prompt for missing values
 		if licenseType == "" {
 			fmt.Println("Available licenses: mit, apache2, gpl3, bsd3")
-			var err error
 			licenseType, err = utils.PromptInput("Select license type: ")
 			if err != nil {
 				return err
@@ -47,7 +46,6 @@ var AddLicenseCmd = &cobra.Command{
 		}
 
 		if author == "" {
-			var err error
 			author, err = utils.PromptInput("Enter author name: ")
 			if err != nil {
 				return err

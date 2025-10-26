@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 )
 
 // FlutterCmd is the parent command for Flutter operations

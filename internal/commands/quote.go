@@ -35,7 +35,7 @@ var QuoteCmd = &cobra.Command{
 		// Using math/rand is acceptable for non-security quote selection
 		// #nosec G404
 		rand.Seed(time.Now().UnixNano())
-		quote := quotes[rand.Intn(len(quotes))]
+		quote := quotes[rand.Intn(len(quotes))] // #nosec G404
 		fmt.Println("\n✨ " + quote + "\n")
 		return nil
 	},

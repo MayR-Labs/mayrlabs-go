@@ -6,8 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 )
 
 // EnvCmd is the parent command for environment operations
@@ -16,6 +17,8 @@ var EnvCmd = &cobra.Command{
 	Short: "Environment file management commands",
 	Long:  "Commands for managing .env files, validating variables, and syncing examples",
 	Run: func(cmd *cobra.Command, args []string) {
+		// Ignoring error is acceptable for help display
+		// #nosec
 		_ = cmd.Help()
 	},
 }
