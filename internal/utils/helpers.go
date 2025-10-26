@@ -205,3 +205,24 @@ func SurveyConfirm(message string, defaultValue bool) (bool, error) {
 	err := survey.AskOne(prompt, &result)
 	return result, err
 }
+
+// GeneratePIN generates a random 6-digit PIN
+func GeneratePIN() (string, error) {
+	num, err := rand.Int(rand.Reader, big.NewInt(1000000))
+	if err != nil {
+		return "", err
+	}
+	// Ensure 6 digits with leading zeros if needed
+	return fmt.Sprintf("%06d", num.Int64()), nil
+}
+
+// PromptMultiSelect prompts the user to select multiple items from a list
+func PromptMultiSelect(message string, options []string) ([]string, error) {
+	var result []string
+	prompt := &survey.MultiSelect{
+		Message: message,
+		Options: options,
+	}
+	err := survey.AskOne(prompt, &result)
+	return result, err
+}

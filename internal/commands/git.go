@@ -62,9 +62,9 @@ var GitPruneStaleCmd = &cobra.Command{
 		}
 		currentBranch := strings.TrimSpace(string(currentOutput))
 
-		// Parse local branches
+		// Parse local branches and identify stale branches
 		localBranches := strings.Split(string(localOutput), "\n")
-		deletedCount := 0
+		var staleBranches []string
 
 		for _, branch := range localBranches {
 			branch = strings.TrimSpace(branch)
@@ -87,23 +87,98 @@ var GitPruneStaleCmd = &cobra.Command{
 				continue
 			}
 
-			// If branch doesn't exist on remote, delete it
+			// If branch doesn't exist on remote, add to stale list
 			if strings.TrimSpace(string(remoteOutput)) == "" {
-				fmt.Printf("Deleting stale branch: %s\n", branch)
-				deleteCmd := exec.Command("git", "branch", "-D", branch)
-				if err := deleteCmd.Run(); err != nil {
-					fmt.Printf("⚠️  Failed to delete %s: %v\n", branch, err)
-				} else {
-					deletedCount++
-				}
+				staleBranches = append(staleBranches, branch)
 			}
 		}
 
-		if deletedCount == 0 {
+		// If no stale branches, exit early
+		if len(staleBranches) == 0 {
 			fmt.Println("✅ No stale branches found!")
-		} else {
-			fmt.Printf("✅ Deleted %d stale branch(es)!\n", deletedCount)
+			return nil
 		}
+
+		// Display stale branches count
+		fmt.Printf("\n⚠️  Found %d stale branch(es):\n", len(staleBranches))
+		for _, branch := range staleBranches {
+			fmt.Printf("   - %s\n", branch)
+		}
+		fmt.Println()
+
+		// Stern warning
+		fmt.Println("⚠️  WARNING: This is a DESTRUCTIVE action that CANNOT be reversed!")
+		fmt.Println("⚠️  Deleted branches cannot be recovered unless backed up elsewhere.")
+		fmt.Println()
+
+		// Prompt user for action
+		action, err := utils.PromptSelect(
+			"How would you like to proceed?",
+			[]string{"Prune All", "Select Branches to Prune", "Abort"},
+		)
+		if err != nil {
+			return err
+		}
+
+		var branchesToDelete []string
+
+		switch action {
+		case "Abort":
+			fmt.Println("❌ Operation aborted. No branches were deleted.")
+			return nil
+
+		case "Prune All":
+			branchesToDelete = staleBranches
+
+		case "Select Branches to Prune":
+			selected, err := utils.PromptMultiSelect(
+				"Select branches to delete:",
+				staleBranches,
+			)
+			if err != nil {
+				return err
+			}
+
+			if len(selected) == 0 {
+				fmt.Println("❌ No branches selected. Operation aborted.")
+				return nil
+			}
+
+			branchesToDelete = selected
+		}
+
+		// Generate PIN for confirmation
+		pin, err := utils.GeneratePIN()
+		if err != nil {
+			return fmt.Errorf("failed to generate PIN: %w", err)
+		}
+
+		// Display PIN and ask for confirmation
+		fmt.Printf("\n🔐 To confirm deletion of %d branch(es), enter this PIN: %s\n", len(branchesToDelete), pin)
+		userPIN, err := utils.SurveyInput("Enter PIN to confirm", "")
+		if err != nil {
+			return err
+		}
+
+		if userPIN != pin {
+			fmt.Println("❌ Incorrect PIN. Operation aborted. No branches were deleted.")
+			return nil
+		}
+
+		// Delete selected branches
+		fmt.Println("\n🗑️  Deleting branches...")
+		deletedCount := 0
+		for _, branch := range branchesToDelete {
+			fmt.Printf("   Deleting: %s\n", branch)
+			deleteCmd := exec.Command("git", "branch", "-D", branch)
+			if err := deleteCmd.Run(); err != nil {
+				fmt.Printf("   ⚠️  Failed to delete %s: %v\n", branch, err)
+			} else {
+				deletedCount++
+			}
+		}
+
+		fmt.Printf("\n✅ Successfully deleted %d branch(es)!\n", deletedCount)
 
 		return nil
 	},
