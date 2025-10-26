@@ -136,8 +136,12 @@ var FormatCmd = &cobra.Command{
 			language = args[0]
 		} else {
 			var err error
-			fmt.Println("Available languages: go, javascript, python, php, dart")
-			language, err = utils.PromptInput("Select language: ")
+
+			language, err = utils.PromptSelect(
+				"Select language:",
+				[]string{"go", "javascript", "typescript", "python", "php", "dart", "flutter"},
+			)
+
 			if err != nil {
 				return err
 			}

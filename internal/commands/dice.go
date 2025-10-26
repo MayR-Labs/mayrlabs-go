@@ -11,10 +11,11 @@ import (
 
 // RollDiceCmd rolls dice
 var RollDiceCmd = &cobra.Command{
-	Use:   "roll-dice [number_of_dice]",
-	Short: "Roll dice and get random results",
-	Long:  "Roll one or more dice (1-6) and display the results",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "roll-dice [number_of_dice]",
+	Aliases: []string{"dice", "rolldice", "rd"},
+	Short:   "Roll dice and get random results",
+	Long:    "Roll one or more dice (1-6) and display the results",
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var numDice int
 		var err error
