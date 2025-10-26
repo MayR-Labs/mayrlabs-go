@@ -13,11 +13,35 @@ var ChangelogCmd = &cobra.Command{
 	Use:   "changelog",
 	Short: "Changelog management commands",
 	Long:  "Commands for creating and managing CHANGELOG.md files",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Help display errors are not critical
-		err := cmd.Help()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Interactive mode - prompt user to choose subcommand
+		choice, err := utils.PromptSelect(
+			"What would you like to do?",
+			[]string{"create", "record"},
+		)
 		if err != nil {
-			return
+			return err
+		}
+
+		switch choice {
+		case "create":
+			return ChangelogCreateCmd.RunE(cmd, []string{})
+		case "record":
+			// Prompt for version
+			version, err := utils.PromptInput("Enter version (e.g., 1.0.0): ")
+			if err != nil {
+				return err
+			}
+
+			// Prompt for summary
+			summary, err := utils.PromptInput("Enter summary: ")
+			if err != nil {
+				return err
+			}
+
+			return ChangelogRecordCmd.RunE(cmd, []string{version, summary})
+		default:
+			return fmt.Errorf("invalid choice")
 		}
 	},
 }
@@ -78,10 +102,36 @@ var ChangelogRecordCmd = &cobra.Command{
 	Use:   "record [version] [summary]",
 	Short: "Add a new entry to CHANGELOG.md",
 	Long:  "Record a new version entry in CHANGELOG.md with optional --wip flag",
-	Args:  cobra.MinimumNArgs(2),
+	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		version := args[0]
-		summary := args[1]
+		var version, summary string
+		var err error
+
+		// Interactive mode if no args provided
+		if len(args) < 2 {
+			version, err = utils.PromptInput("Enter version (e.g., 1.0.0): ")
+			if err != nil {
+				return err
+			}
+
+			summary, err = utils.PromptInput("Enter summary: ")
+			if err != nil {
+				return err
+			}
+
+			// Ask for user feedback
+			feedback, err := utils.PromptInput("Any additional feedback/notes (optional): ")
+			if err != nil {
+				return err
+			}
+			if feedback != "" {
+				summary = summary + " - " + feedback
+			}
+		} else {
+			version = args[0]
+			summary = args[1]
+		}
+
 		wip, err := cmd.Flags().GetBool("wip")
 		if err != nil {
 			return err

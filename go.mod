@@ -3,7 +3,9 @@ module github.com/MayR-Labs/mayrlabs-go
 go 1.17
 
 require (
+	github.com/atotto/clipboard v0.1.4
 	github.com/google/uuid v1.6.0
+	github.com/oklog/ulid/v2 v2.1.1
 	github.com/spf13/cobra v1.8.0
 )
 

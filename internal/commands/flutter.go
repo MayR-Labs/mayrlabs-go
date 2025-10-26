@@ -13,11 +13,21 @@ var FlutterCmd = &cobra.Command{
 	Use:   "flutter",
 	Short: "Flutter-related commands",
 	Long:  "Commands for managing Flutter projects and build scripts",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Help display errors are not critical
-		err := cmd.Help()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Interactive mode - prompt user to choose subcommand
+		choice, err := utils.PromptSelect(
+			"What would you like to do?",
+			[]string{"create-scripts"},
+		)
 		if err != nil {
-			return
+			return err
+		}
+
+		switch choice {
+		case "create-scripts":
+			return FlutterCreateScriptsCmd.RunE(cmd, []string{})
+		default:
+			return fmt.Errorf("invalid choice")
 		}
 	},
 }

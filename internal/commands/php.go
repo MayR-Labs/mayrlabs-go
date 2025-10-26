@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -12,10 +13,23 @@ var PHPCmd = &cobra.Command{
 	Use:   "php",
 	Short: "PHP-related commands",
 	Long:  "Commands for managing PHP projects (linting, formatting, etc.)",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := cmd.Help()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Interactive mode - prompt user to choose subcommand
+		choice, err := utils.PromptSelect(
+			"What would you like to do?",
+			[]string{"cs-fix", "lint"},
+		)
 		if err != nil {
-			return
+			return err
+		}
+
+		switch choice {
+		case "cs-fix":
+			return PHPCSFixCmd.RunE(cmd, []string{})
+		case "lint":
+			return PHPLintCmd.RunE(cmd, []string{})
+		default:
+			return fmt.Errorf("invalid choice")
 		}
 	},
 }
