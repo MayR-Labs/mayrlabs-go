@@ -175,6 +175,9 @@ mayrlabs changelog create
 mayrlabs uuid
 # Output: 550e8400-e29b-41d4-a716-446655440000
 
+# Generate a UUID and copy to clipboard
+mayrlabs uuid --copy
+
 # Generate a secure password (32 characters)
 mayrlabs password 32
 # Output: Xy9$mK2#pL8vN@qR5wT7uZ1aB3cD6eF0
@@ -182,6 +185,38 @@ mayrlabs password 32
 # Hash a string
 mayrlabs hash "my-secret" --algorithm sha256
 # Output: my-secret (sha256): 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+
+# Roll 3 dice
+mayrlabs roll-dice 3
+# Output: Results: [4 1 3], Total: 8, Average: 2.67
+```
+
+### Encoding/Decoding
+
+```bash
+# Base64 encode a string
+mayrlabs base64 encode "Hello World"
+# Output: SGVsbG8gV29ybGQ=
+
+# Base64 decode a string
+mayrlabs base64 decode "SGVsbG8gV29ybGQ="
+# Output: Hello World
+
+# Encode a file to base64
+mayrlabs base64-file myfile.txt --copy
+
+# Decode base64 to a file
+mayrlabs base64-decode-to-file "SGVsbG8gV29ybGQ=" output.txt
+```
+
+### System Management
+
+```bash
+# Create an alias for mayrlabs
+mayrlabs alias ml
+
+# Upgrade to latest version
+mayrlabs upgrade
 ```
 
 ### Environment Management
@@ -225,19 +260,41 @@ mayrlabs git prune-stale
 
 | Command                             | Description                                                            |
 | ----------------------------------- | ---------------------------------------------------------------------- |
-| `mayrlabs uuid`                     | Generate UUID v4                                                       |
+| `mayrlabs uuid [--copy]`            | Generate UUID v4 (optional --copy flag to copy to clipboard)          |
+| `mayrlabs ulid [--copy]`            | Generate ULID (optional --copy flag to copy to clipboard)             |
 | `mayrlabs password [length]`        | Generate a random password of specified length (default: 16)           |
 | `mayrlabs hash [string]`            | Generate hash of a string using md5, sha1, or sha256                   |
-| `mayrlabs create-keystore`          | Create a new keystore interactively                                    |
+| `mayrlabs hash-file [file]`         | Generate hash of a file (interactive mode if no args)                  |
+| `mayrlabs create-keystore`          | Create a new keystore interactively (uses PKCS12 format)               |
 | `mayrlabs dns-clear`                | Clear the DNS cache (choose macOS, Linux, or Windows)                  |
 | `mayrlabs ci`                       | Generate CI/CD workflow YAML for your language and VCS                 |
 | `mayrlabs format [language]`        | Format project files for a given language (interactive if omitted)     |
-| `mayrlabs add-license`              | Create a LICENSE file based on selected type, year, and author         |
-| `mayrlabs editor-config [language]` | Generate `.editorconfig` for a specific language (supports `--force`)  |
+| `mayrlabs add-license`              | Create a LICENSE file with author, year, and optional URL              |
+| `mayrlabs editor-config [language]` | Generate `.editorconfig` for a specific language (interactive mode)    |
+| `mayrlabs roll-dice [n]`            | Roll n dice and display results with total and average                 |
 | `mayrlabs quote`                    | Display a random motivational quote for developers                     |
 | `mayrlabs version`                  | Display the version of mayrlabs CLI                                    |
 | `mayrlabs visit`                    | Open the MayR Labs website in your browser                             |
 | `mayrlabs github`                   | Open the mayrlabs-go GitHub repository in your browser                 |
+
+---
+
+### 🔧 System Commands
+
+| Command                     | Description                                                       |
+| --------------------------- | ----------------------------------------------------------------- |
+| `mayrlabs alias [name]`     | Create a permanent shell alias for mayrlabs command               |
+| `mayrlabs upgrade`          | Upgrade mayrlabs to the latest version                            |
+
+---
+
+### 🔐 Encoding/Decoding Commands
+
+| Command                                    | Description                                                  |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `mayrlabs base64 encode/decode [string]`   | Encode or decode a string using base64 (with --copy flag)   |
+| `mayrlabs base64-file [path]`              | Encode a file to base64 (with --copy flag)                  |
+| `mayrlabs base64-decode-to-file [string]`  | Decode base64 string and write to a file                    |
 
 ---
 
@@ -411,110 +468,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ by MayR Labs**
-mayrlabs --help
-mayrlabs <command> --help
-```
-
----
-
-## ⚙️ Commands
-
-### 🧱 General Commands
-
-| Command                             | Description                                                            |
-| ----------------------------------- | ---------------------------------------------------------------------- |
-| `mayrlabs create-keystore`          | Create a new keystore interactively.                                   |
-| `mayrlabs dns-clear`                | Clear the DNS cache (choose macOS, Linux, or Windows).                 |
-| `mayrlabs ci`                       | Generate CI/CD workflow YAML for your language and VCS.                |
-| `mayrlabs format [language]`        | Format project files for a given language (interactive if omitted).    |
-| `mayrlabs add-license`              | Create a LICENSE file based on selected type, year, and author.        |
-| `mayrlabs editor-config [language]` | Generate `.editorconfig` for a specific language (supports `--force`). |
-| `mayrlabs hash [string]`            | Generate hash of a string using md5, sha1, or sha256.                  |
-| `mayrlabs uuid`                     | Generate UUID v4.                                                      |
-| `mayrlabs password [length]`        | Generate a random password of specified length (default: 16).          |
-| `mayrlabs version`                  | Display the version of mayrlabs CLI.                                   |
-| `mayrlabs visit`                    | Open the MayR Labs website in your browser.                            |
-| `mayrlabs github`                   | Open the mayrlabs-go GitHub repository in your browser.                |
-
----
-
-### 🌿 Git Commands
-
-| Command                    | Description                                        |
-| -------------------------- | -------------------------------------------------- |
-| `mayrlabs git`             | Show available Git-related commands.               |
-| `mayrlabs git prune-stale` | Delete all local branches not found on the remote. |
-
----
-
-### 🔐 ENV Commands
-
-| Command                                | Description                                                                           |
-| -------------------------------------- | ------------------------------------------------------------------------------------- |
-| `mayrlabs env`                         | List available environment commands.                                                  |
-| `mayrlabs env update-example [source]` | Sync `.env.example` with `.env` or `.env.staging`. Creates `.env.example` if missing. |
-| `mayrlabs env validate`                | Check for missing keys, invalid values, or duplicated variables.                      |
-| `mayrlabs env arrange [file]`          | Sort and group environment keys by prefix (e.g., `APP_*`, `DB_*`).                    |
-
----
-
-### 📝 CHANGELOG Commands
-
-| Command                                         | Description                                           |
-| ----------------------------------------------- | ----------------------------------------------------- |
-| `mayrlabs changelog`                            | Display all changelog commands.                       |
-| `mayrlabs changelog create [--force]`           | Create or overwrite `CHANGELOG.md`.                   |
-| `mayrlabs changelog record [version] [summary]` | Add a new entry to `CHANGELOG.md` (supports `--wip`). |
-
----
-
-### 🐦 Flutter Commands
-
-| Command                           | Description                                                         |
-| --------------------------------- | ------------------------------------------------------------------- |
-| `mayrlabs flutter`                | List Flutter-related commands.                                      |
-| `mayrlabs flutter create-scripts` | Add useful build scripts to `scripts/` (IPA, APK, AppBundle, etc.). |
-
----
-
-### 🐘 PHP Commands
-
-| Command               | Description                   |
-| --------------------- | ----------------------------- |
-| `mayrlabs php`        | List PHP commands.            |
-| `mayrlabs php cs-fix` | Run PHP CodeSniffer/CS-Fixer. |
-| `mayrlabs php lint`   | Lint PHP files.               |
-
----
-
-### ⚡ JavaScript Commands
-
-| Command                      | Description                                             |
-| ---------------------------- | ------------------------------------------------------- |
-| `mayrlabs js`                | List JavaScript commands.                               |
-| `mayrlabs js setup-prettier` | Install and configure Prettier with `.prettierrc.yaml`. |
-| `mayrlabs js pretty`         | Run Prettier on the project.                            |
-
----
-
-## 🪄 Bonus (Fun / Easter Eggs)
-
-| Command           | Description                                         |
-| ----------------- | --------------------------------------------------- |
-| `mayrlabs quote`  | Display a random motivational quote for developers. |
-| `mayrlabs visit`  | Open the MayR Labs website in your browser.         |
-| `mayrlabs github` | Open the GitHub repository in your browser.         |
-
----
-
-## 🧠 Examples
-
-```bash
-# Create a CI file for a Flutter project using GitHub Actions
-mayrlabs ci --lang flutter --vcs github
-
-# Sync .env.example with .env
-mayrlabs env update-example
 
 # Format Go code
 mayrlabs format go
