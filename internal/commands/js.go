@@ -15,7 +15,11 @@ var JSCmd = &cobra.Command{
 	Short: "JavaScript-related commands",
 	Long:  "Commands for managing JavaScript/Node.js projects",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		err := cmd.Help()
+
+		if err != nil {
+			return
+		}
 	},
 }
 

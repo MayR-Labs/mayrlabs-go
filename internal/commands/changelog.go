@@ -16,7 +16,11 @@ var ChangelogCmd = &cobra.Command{
 	Long:  "Commands for creating and managing CHANGELOG.md files",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Help display errors are not critical
-		cmd.Help() // nolint:errcheck
+		err := cmd.Help()
+
+		if err != nil {
+			return
+		}
 	},
 }
 

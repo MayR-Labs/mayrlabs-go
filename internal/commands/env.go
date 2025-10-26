@@ -18,7 +18,11 @@ var EnvCmd = &cobra.Command{
 	Long:  "Commands for managing .env files, validating variables, and syncing examples",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Help display errors are not critical
-		cmd.Help() // nolint:errcheck
+		err := cmd.Help()
+
+		if err != nil {
+			return
+		}
 	},
 }
 

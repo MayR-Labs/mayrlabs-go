@@ -14,7 +14,11 @@ var GitCmd = &cobra.Command{
 	Short: "Git-related commands",
 	Long:  "Commands for managing Git repositories and branches",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		err := cmd.Help()
+
+		if err != nil {
+			return
+		}
 	},
 }
 
