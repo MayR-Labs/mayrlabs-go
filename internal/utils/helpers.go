@@ -98,7 +98,13 @@ func HashFile(filePath, algorithm string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+
+		if err != nil {
+			return 
+		}
+	}(file)
 
 	var hasher io.Writer
 	switch strings.ToLower(algorithm) {

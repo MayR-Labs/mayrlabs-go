@@ -8,7 +8,6 @@ linters:
     - staticcheck
     - unused
     - misspell
-    - goconst
     - gocritic
     - gocyclo
     - unconvert

@@ -63,7 +63,7 @@ var PasswordCmd = &cobra.Command{
 				return err
 			}
 		} else {
-			length, err = 0, nil
+			length = 0
 			_, err = fmt.Sscanf(args[0], "%d", &length)
 			if err != nil {
 				return fmt.Errorf("invalid length: %s", args[0])
