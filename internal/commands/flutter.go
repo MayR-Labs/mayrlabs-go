@@ -15,7 +15,8 @@ var FlutterCmd = &cobra.Command{
 	Short: "Flutter-related commands",
 	Long:  "Commands for managing Flutter projects and build scripts",
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
+		// Help display errors are not critical
+		cmd.Help() // nolint:errcheck
 	},
 }
 

@@ -15,9 +15,8 @@ var ChangelogCmd = &cobra.Command{
 	Short: "Changelog management commands",
 	Long:  "Commands for creating and managing CHANGELOG.md files",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Ignoring error is acceptable for help display
-		// #nosec
-		_ = cmd.Help()
+		// Help display errors are not critical
+		cmd.Help() // nolint:errcheck
 	},
 }
 

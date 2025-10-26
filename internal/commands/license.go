@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 )
 
 // AddLicenseCmd creates a LICENSE file

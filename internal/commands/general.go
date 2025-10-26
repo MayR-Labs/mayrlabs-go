@@ -5,8 +5,9 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 )
 
 // DNSClearCmd clears the DNS cache
