@@ -2,9 +2,9 @@ package utils
 
 import (
 	"bufio"
-	"crypto/md5"
+	"crypto/md5" // #nosec G501 - MD5 is intentionally supported for user choice in hash command
 	"crypto/rand"
-	"crypto/sha1"
+	"crypto/sha1" // #nosec G505 - SHA1 is intentionally supported for user choice in hash command
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
