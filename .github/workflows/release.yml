@@ -12,38 +12,38 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
-        go-version: '1.21'
-    
+        go-version: latest
+
     - name: Run tests
       run: go test -v ./...
-    
+
     - name: Build for multiple platforms
       run: |
         # Linux AMD64
         GOOS=linux GOARCH=amd64 go build -o mayrlabs-linux-amd64 ./main.go
-        
+
         # Linux ARM64
         GOOS=linux GOARCH=arm64 go build -o mayrlabs-linux-arm64 ./main.go
-        
+
         # macOS AMD64
         GOOS=darwin GOARCH=amd64 go build -o mayrlabs-darwin-amd64 ./main.go
-        
+
         # macOS ARM64 (Apple Silicon)
         GOOS=darwin GOARCH=arm64 go build -o mayrlabs-darwin-arm64 ./main.go
-        
+
         # Windows AMD64
         GOOS=windows GOARCH=amd64 go build -o mayrlabs-windows-amd64.exe ./main.go
-    
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
