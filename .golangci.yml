@@ -25,7 +25,6 @@ formatters:
     - gofumpt
     - goimports
     - golines
-    - swaggo
 
 issues:
   max-issues-per-linter: 50
