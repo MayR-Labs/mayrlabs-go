@@ -1,3 +1,5 @@
+version: 2
+
 linters-settings:
   errcheck:
     check-type-assertions: true
@@ -43,9 +45,12 @@ linters:
     - gosec
     - unconvert
     - dupl
-    - exportloopref
+    # exportloopref removed — deprecated since Go 1.22, now handled by built-in loopvar check
 
 issues:
+  exclude-dirs:
+    - vendor
+    - tmp
   exclude-rules:
     - path: _test\.go
       linters:
@@ -56,9 +61,6 @@ issues:
 run:
   timeout: 5m
   tests: true
-  skip-dirs:
-    - vendor
-    - tmp
 
 output:
   format: colored-line-number
