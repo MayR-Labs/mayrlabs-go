@@ -66,6 +66,11 @@ func init() {
 
 	// New commands for v0.5.0 - Session management
 	rootCmd.AddCommand(commands.SessionStartCmd)
+	rootCmd.AddCommand(commands.SessionsCmd)
+	rootCmd.AddCommand(commands.SessionClearCmd)
+	rootCmd.AddCommand(commands.SessionPruneCmd)
+	rootCmd.AddCommand(commands.SecureSessionStartCmd)
+	rootCmd.AddCommand(commands.SecureSessionsCmd)
 
 	// New commands for v0.5.0 - Alias management
 	rootCmd.AddCommand(commands.AliasListCmd)
