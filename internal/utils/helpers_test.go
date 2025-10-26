@@ -239,3 +239,52 @@ func TestGeneratePasswordByType(t *testing.T) {
 		})
 	}
 }
+
+func TestGeneratePIN(t *testing.T) {
+	// Test that PIN is generated without error
+	pin, err := GeneratePIN()
+	if err != nil {
+		t.Errorf("GeneratePIN() error = %v", err)
+		return
+	}
+
+	// Test that PIN is exactly 6 characters
+	if len(pin) != 6 {
+		t.Errorf("GeneratePIN() length = %v, want 6", len(pin))
+	}
+
+	// Test that PIN contains only digits
+	for _, c := range pin {
+		if c < '0' || c > '9' {
+			t.Errorf("GeneratePIN() contains non-digit character: %c", c)
+		}
+	}
+
+	// Test that multiple calls generate different PINs (with high probability)
+	pin2, err := GeneratePIN()
+	if err != nil {
+		t.Errorf("GeneratePIN() second call error = %v", err)
+		return
+	}
+
+	// Generate several more PINs to check randomness
+	// Note: There's a tiny chance all could be the same, but highly unlikely
+	allSame := pin == pin2
+	if allSame {
+		// Try a few more times
+		for i := 0; i < 5; i++ {
+			pin3, err := GeneratePIN()
+			if err != nil {
+				t.Errorf("GeneratePIN() call %d error = %v", i+3, err)
+				return
+			}
+			if pin3 != pin {
+				allSame = false
+				break
+			}
+		}
+		if allSame {
+			t.Errorf("GeneratePIN() appears to not be random - all 7 calls returned same PIN: %s", pin)
+		}
+	}
+}
