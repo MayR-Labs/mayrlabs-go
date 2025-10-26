@@ -13,10 +13,23 @@ var JSCmd = &cobra.Command{
 	Use:   "js",
 	Short: "JavaScript-related commands",
 	Long:  "Commands for managing JavaScript/Node.js projects",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := cmd.Help()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Interactive mode - prompt user to choose subcommand
+		choice, err := utils.PromptSelect(
+			"What would you like to do?",
+			[]string{"setup-prettier", "pretty"},
+		)
 		if err != nil {
-			return
+			return err
+		}
+
+		switch choice {
+		case "setup-prettier":
+			return JSSetupPrettierCmd.RunE(cmd, []string{})
+		case "pretty":
+			return JSPrettyCmd.RunE(cmd, []string{})
+		default:
+			return fmt.Errorf("invalid choice")
 		}
 	},
 }

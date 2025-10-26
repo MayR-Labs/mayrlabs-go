@@ -2,8 +2,11 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
@@ -86,12 +89,19 @@ var CreateKeystoreCmd = &cobra.Command{
 			return err
 		}
 
-		validity, err := utils.PromptInput("Enter validity in days (default: 10000): ")
+		validity, err := utils.PromptInput("Enter validity in days (optional, press Enter for default 10000): ")
 		if err != nil {
 			return err
 		}
 		if validity == "" {
 			validity = "10000"
+		}
+
+		// Create directory for keystore if path contains directory
+		if dir := strings.TrimSuffix(keystoreName, filepath.Base(keystoreName)); dir != "" {
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				return fmt.Errorf("failed to create directory: %w", err)
+			}
 		}
 
 		fmt.Println("\nGenerating keystore...")

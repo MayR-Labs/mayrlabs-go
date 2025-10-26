@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -119,6 +120,121 @@ func TestFileExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := FileExists(tt.path); got != tt.want {
 				t.Errorf("FileExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHashFile(t *testing.T) {
+	// Create a temporary test file using t.TempDir()
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "test_hash_file.txt")
+	content := "test content for hashing"
+	if err := WriteFile(tmpFile, content); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	tests := []struct {
+		name      string
+		algorithm string
+		wantErr   bool
+	}{
+		{
+			name:      "MD5 hash file",
+			algorithm: "md5",
+			wantErr:   false,
+		},
+		{
+			name:      "SHA1 hash file",
+			algorithm: "sha1",
+			wantErr:   false,
+		},
+		{
+			name:      "SHA256 hash file",
+			algorithm: "sha256",
+			wantErr:   false,
+		},
+		{
+			name:      "Invalid algorithm",
+			algorithm: "invalid",
+			wantErr:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := HashFile(tmpFile, tt.algorithm)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("HashFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && len(got) == 0 {
+				t.Errorf("HashFile() returned empty hash")
+			}
+		})
+	}
+
+	// Test non-existent file
+	_, err := HashFile(filepath.Join(tmpDir, "nonexistent-file-12345.txt"), "sha256")
+	if err == nil {
+		t.Errorf("HashFile() should return error for non-existent file")
+	}
+}
+
+func TestGeneratePasswordByType(t *testing.T) {
+	tests := []struct {
+		name         string
+		length       int
+		passwordType string
+		wantErr      bool
+	}{
+		{
+			name:         "Generate alpha password",
+			length:       16,
+			passwordType: "alpha",
+			wantErr:      false,
+		},
+		{
+			name:         "Generate numeral password",
+			length:       16,
+			passwordType: "numeral",
+			wantErr:      false,
+		},
+		{
+			name:         "Generate alphanum password",
+			length:       16,
+			passwordType: "alphanum",
+			wantErr:      false,
+		},
+		{
+			name:         "Generate alphanum+special password",
+			length:       16,
+			passwordType: "alphanum+special",
+			wantErr:      false,
+		},
+		{
+			name:         "Generate sentence password",
+			length:       24,
+			passwordType: "sentence",
+			wantErr:      false,
+		},
+		{
+			name:         "Invalid password type",
+			length:       16,
+			passwordType: "invalid",
+			wantErr:      true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GeneratePasswordByType(tt.length, tt.passwordType)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GeneratePasswordByType() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && len(got) == 0 {
+				t.Errorf("GeneratePasswordByType() returned empty password")
 			}
 		})
 	}

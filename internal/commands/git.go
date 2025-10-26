@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -13,10 +14,21 @@ var GitCmd = &cobra.Command{
 	Use:   "git",
 	Short: "Git-related commands",
 	Long:  "Commands for managing Git repositories and branches",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := cmd.Help()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Interactive mode - prompt user to choose subcommand
+		choice, err := utils.PromptSelect(
+			"What would you like to do?",
+			[]string{"prune-stale"},
+		)
 		if err != nil {
-			return
+			return err
+		}
+
+		switch choice {
+		case "prune-stale":
+			return GitPruneStaleCmd.RunE(cmd, []string{})
+		default:
+			return fmt.Errorf("invalid choice")
 		}
 	},
 }

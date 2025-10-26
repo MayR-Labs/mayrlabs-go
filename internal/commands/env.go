@@ -15,11 +15,41 @@ var EnvCmd = &cobra.Command{
 	Use:   "env",
 	Short: "Environment file management commands",
 	Long:  "Commands for managing .env files, validating variables, and syncing examples",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Help display errors are not critical
-		err := cmd.Help()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Interactive mode - prompt user to choose subcommand
+		choice, err := utils.PromptSelect(
+			"What would you like to do?",
+			[]string{"update-example", "validate", "arrange"},
+		)
 		if err != nil {
-			return
+			return err
+		}
+
+		switch choice {
+		case "update-example":
+			// Prompt for source file
+			source, err := utils.PromptInput("Enter source file (default: .env): ")
+			if err != nil {
+				return err
+			}
+			if source == "" {
+				source = ".env"
+			}
+			return EnvUpdateExampleCmd.RunE(cmd, []string{source})
+		case "validate":
+			return EnvValidateCmd.RunE(cmd, []string{})
+		case "arrange":
+			// Prompt for file
+			file, err := utils.PromptInput("Enter file to arrange (default: .env): ")
+			if err != nil {
+				return err
+			}
+			if file == "" {
+				file = ".env"
+			}
+			return EnvArrangeCmd.RunE(cmd, []string{file})
+		default:
+			return fmt.Errorf("invalid choice")
 		}
 	},
 }
