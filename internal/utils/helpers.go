@@ -2,9 +2,9 @@ package utils
 
 import (
 	"bufio"
-	"crypto/md5" // #nosec G501 - MD5 is intentionally supported for user choice in hash command
+	"crypto/md5"
 	"crypto/rand"
-	"crypto/sha1" // #nosec G505 - SHA1 is intentionally supported for user choice in hash command
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -22,16 +22,6 @@ func PromptInput(message string) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(input), nil
-}
-
-// PromptYesNo prompts the user for a yes/no response
-func PromptYesNo(message string) bool {
-	response, err := PromptInput(message + " (y/n): ")
-	if err != nil {
-		return false
-	}
-	response = strings.ToLower(response)
-	return response == "y" || response == "yes"
 }
 
 // FileExists checks if a file exists
