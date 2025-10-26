@@ -96,7 +96,7 @@ func HashFile(filePath, algorithm string) (string, error) {
 		err := file.Close()
 
 		if err != nil {
-			return 
+			return
 		}
 	}(file)
 

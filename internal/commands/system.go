@@ -94,7 +94,12 @@ var AliasCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to open config file: %w", err)
 		}
-		defer file.Close()
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				return
+			}
+		}(file)
 
 		if _, err := file.WriteString(aliasLine); err != nil {
 			return fmt.Errorf("failed to write alias: %w", err)

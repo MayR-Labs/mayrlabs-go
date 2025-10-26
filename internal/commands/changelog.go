@@ -143,7 +143,10 @@ var ChangelogRecordCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				cmd.Flags().Set("wip", fmt.Sprintf("%t", wip))
+				err = cmd.Flags().Set("wip", fmt.Sprintf("%t", wip))
+				if err != nil {
+					return err
+				}
 			}
 		} else {
 			version = args[0]
