@@ -10,6 +10,7 @@ func TestGenerateLicense(t *testing.T) {
 		wantContain string
 		licenseType string
 		author      string
+		authorURL   string
 		year        string
 		wantErr     bool
 	}{
@@ -17,6 +18,7 @@ func TestGenerateLicense(t *testing.T) {
 			name:        "MIT License",
 			licenseType: "mit",
 			author:      "Test Author",
+			authorURL:   "",
 			year:        "2024",
 			wantErr:     false,
 			wantContain: "MIT License",
@@ -25,6 +27,7 @@ func TestGenerateLicense(t *testing.T) {
 			name:        "Apache2 License",
 			licenseType: "apache2",
 			author:      "Test Author",
+			authorURL:   "",
 			year:        "2024",
 			wantErr:     false,
 			wantContain: "Apache License",
@@ -33,6 +36,7 @@ func TestGenerateLicense(t *testing.T) {
 			name:        "GPL3 License",
 			licenseType: "gpl3",
 			author:      "Test Author",
+			authorURL:   "",
 			year:        "2024",
 			wantErr:     false,
 			wantContain: "GNU GENERAL PUBLIC LICENSE",
@@ -41,6 +45,7 @@ func TestGenerateLicense(t *testing.T) {
 			name:        "BSD3 License",
 			licenseType: "bsd3",
 			author:      "Test Author",
+			authorURL:   "",
 			year:        "2024",
 			wantErr:     false,
 			wantContain: "BSD 3-Clause License",
@@ -49,6 +54,7 @@ func TestGenerateLicense(t *testing.T) {
 			name:        "Invalid License",
 			licenseType: "invalid",
 			author:      "Test Author",
+			authorURL:   "",
 			year:        "2024",
 			wantErr:     true,
 			wantContain: "",
@@ -57,7 +63,7 @@ func TestGenerateLicense(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := generateLicense(tt.licenseType, tt.author, tt.year)
+			got, err := generateLicense(tt.licenseType, tt.author, tt.authorURL, tt.year)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("generateLicense() error = %v, wantErr %v", err, tt.wantErr)
 				return

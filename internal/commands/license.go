@@ -22,6 +22,10 @@ var AddLicenseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		authorURL, err := cmd.Flags().GetString("author-url")
+		if err != nil {
+			return err
+		}
 		year, err := cmd.Flags().GetString("year")
 		if err != nil {
 			return err
@@ -36,28 +40,57 @@ var AddLicenseCmd = &cobra.Command{
 			return fmt.Errorf("LICENSE file already exists. Use --force to overwrite")
 		}
 
-		// Prompt for missing values
+		// Interactive mode
 		if licenseType == "" {
-			fmt.Println("Available licenses: mit, apache2, gpl3, bsd3")
-			licenseType, err = utils.PromptInput("Select license type: ")
+			licenseType, err = utils.PromptSelect(
+				"Select license type:",
+				[]string{"mit", "apache2", "gpl3", "bsd3"},
+			)
 			if err != nil {
 				return err
 			}
 		}
 
 		if author == "" {
-			author, err = utils.PromptInput("Enter author name: ")
+			author, err = utils.SurveyInput("Enter author name:", "")
 			if err != nil {
 				return err
 			}
 		}
 
+		// Ask for author URL in interactive mode
+		if authorURL == "" {
+			authorURL, err = utils.SurveyInput("Enter author URL (optional):", "")
+			if err != nil {
+				return err
+			}
+		}
+
+		// Ask for year in interactive mode with default
 		if year == "" {
-			year = fmt.Sprintf("%d", time.Now().Year())
+			defaultYear := fmt.Sprintf("%d", time.Now().Year())
+			year, err = utils.SurveyInput("Enter copyright year:", defaultYear)
+			if err != nil {
+				return err
+			}
+			if year == "" {
+				year = defaultYear
+			}
+		}
+
+		// Ask for force flag in interactive mode if file exists
+		if utils.FileExists("LICENSE") && !force {
+			force, err = utils.SurveyConfirm("LICENSE file already exists. Overwrite?", false)
+			if err != nil {
+				return err
+			}
+			if !force {
+				return fmt.Errorf("operation cancelled")
+			}
 		}
 
 		// Generate license content
-		content, err := generateLicense(licenseType, author, year)
+		content, err := generateLicense(licenseType, author, authorURL, year)
 		if err != nil {
 			return err
 		}
@@ -75,11 +108,18 @@ var AddLicenseCmd = &cobra.Command{
 func init() {
 	AddLicenseCmd.Flags().StringP("type", "t", "", "License type (mit, apache2, gpl3, bsd3)")
 	AddLicenseCmd.Flags().StringP("author", "a", "", "Author name")
+	AddLicenseCmd.Flags().String("author-url", "", "Author URL (optional)")
 	AddLicenseCmd.Flags().StringP("year", "y", "", "Copyright year (default: current year)")
 	AddLicenseCmd.Flags().BoolP("force", "f", false, "Overwrite existing LICENSE file")
 }
 
-func generateLicense(licenseType, author, year string) (string, error) {
+func generateLicense(licenseType, author, authorURL, year string) (string, error) {
+	// Format author with URL if provided
+	authorInfo := author
+	if authorURL != "" {
+		authorInfo = fmt.Sprintf("%s (%s)", author, authorURL)
+	}
+
 	switch licenseType {
 	case "mit":
 		return fmt.Sprintf(`MIT License
@@ -103,7 +143,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`, year, author), nil
+`, year, authorInfo), nil
 
 	case "apache2":
 		return fmt.Sprintf(`Apache License
@@ -123,7 +163,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-`, year, author), nil
+`, year, authorInfo), nil
 
 	case "gpl3":
 		return fmt.Sprintf(`GNU GENERAL PUBLIC LICENSE
@@ -143,7 +183,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
-`, year, author), nil
+`, year, authorInfo), nil
 
 	case "bsd3":
 		return fmt.Sprintf(`BSD 3-Clause License
@@ -175,7 +215,7 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-`, year, author), nil
+`, year, authorInfo), nil
 
 	default:
 		return "", fmt.Errorf("unsupported license type: %s", licenseType)

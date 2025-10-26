@@ -113,7 +113,7 @@ var EnvUpdateExampleCmd = &cobra.Command{
 var EnvValidateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Check for missing keys, invalid values, or duplicated variables",
-	Long:  "Validate .env file for common issues like duplicates, empty values, and syntax errors",
+	Long:  "Validate .env file for common issues like duplicates, empty values, and syntax errors. Also checks for keys in .env.example that are not in .env",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !utils.FileExists(".env") {
 			return fmt.Errorf(".env file does not exist")
@@ -126,6 +126,7 @@ var EnvValidateCmd = &cobra.Command{
 
 		lines := strings.Split(content, "\n")
 		seen := make(map[string]int)
+		envKeys := make(map[string]bool)
 		issues := 0
 
 		for i, line := range lines {
@@ -162,10 +163,39 @@ var EnvValidateCmd = &cobra.Command{
 				issues++
 			}
 			seen[key] = lineNum
+			envKeys[key] = true
 
 			// Check for empty values (warning only)
 			if value == "" {
 				fmt.Printf("⚠️  Line %d: Empty value for key '%s'\n", lineNum, key)
+			}
+		}
+
+		// Check for keys in .env.example that are not in .env
+		if utils.FileExists(".env.example") {
+			exampleContent, err := utils.ReadFile(".env.example")
+			if err == nil {
+				exampleLines := strings.Split(exampleContent, "\n")
+				for i, line := range exampleLines {
+					lineNum := i + 1
+					line = strings.TrimSpace(line)
+
+					// Skip empty lines and comments
+					if line == "" || strings.HasPrefix(line, "#") {
+						continue
+					}
+
+					// Check for valid key=value format
+					if strings.Contains(line, "=") {
+						parts := strings.SplitN(line, "=", 2)
+						key := parts[0]
+
+						// Check if key exists in .env
+						if !envKeys[key] {
+							fmt.Printf("⚠️  Key '%s' found in .env.example (line %d) but not in .env\n", key, lineNum)
+						}
+					}
+				}
 			}
 		}
 

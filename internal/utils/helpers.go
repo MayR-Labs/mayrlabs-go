@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"bufio"
 	"crypto/md5" // #nosec G501 - MD5 is intentionally supported for user choice in hash command
 	"crypto/rand"
 	"crypto/sha1" // #nosec G505 - SHA1 is intentionally supported for user choice in hash command
@@ -13,18 +12,13 @@ import (
 	"os"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/atotto/clipboard"
 )
 
-// PromptInput prompts the user for input with a message
+// PromptInput prompts the user for input with a message (legacy version)
 func PromptInput(message string) (string, error) {
-	fmt.Print(message)
-	reader := bufio.NewReader(os.Stdin)
-	input, err := reader.ReadString('\n')
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(input), nil
+	return SurveyInput(message, "")
 }
 
 // FileExists checks if a file exists
@@ -181,23 +175,33 @@ func GeneratePasswordByType(length int, passwordType string) (string, error) {
 
 // PromptSelect prompts the user to select from a list of options
 func PromptSelect(message string, options []string) (string, error) {
-	fmt.Println(message)
-	for i, option := range options {
-		fmt.Printf("%d. %s\n", i+1, option)
+	var result string
+	prompt := &survey.Select{
+		Message: message,
+		Options: options,
 	}
-	fmt.Print("Enter choice (number): ")
+	err := survey.AskOne(prompt, &result)
+	return result, err
+}
 
-	reader := bufio.NewReader(os.Stdin)
-	input, err := reader.ReadString('\n')
-	if err != nil {
-		return "", err
+// SurveyInput prompts the user for input using survey
+func SurveyInput(message string, defaultValue string) (string, error) {
+	var result string
+	prompt := &survey.Input{
+		Message: message,
+		Default: defaultValue,
 	}
+	err := survey.AskOne(prompt, &result)
+	return result, err
+}
 
-	var choice int
-	_, err = fmt.Sscanf(strings.TrimSpace(input), "%d", &choice)
-	if err != nil || choice < 1 || choice > len(options) {
-		return "", fmt.Errorf("invalid choice")
+// SurveyConfirm prompts the user for a yes/no confirmation
+func SurveyConfirm(message string, defaultValue bool) (bool, error) {
+	var result bool
+	prompt := &survey.Confirm{
+		Message: message,
+		Default: defaultValue,
 	}
-
-	return options[choice-1], nil
+	err := survey.AskOne(prompt, &result)
+	return result, err
 }
