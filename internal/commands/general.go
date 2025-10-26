@@ -77,19 +77,23 @@ var CreateKeystoreCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("🔐 Creating Android Keystore...")
 
-		alias, err := utils.PromptInput("Enter key alias: ")
+		alias, err := utils.SurveyInput("Enter key alias:", "")
 		if err != nil {
 			return err
 		}
+		if alias == "" {
+			return fmt.Errorf("key alias cannot be empty")
+		}
 
-		keystoreName, err := utils.PromptInput(
-			"Enter keystore filename (e.g., my-release-key.jks): ",
-		)
+		keystoreName, err := utils.SurveyInput("Enter keystore filename (e.g., my-release-key.jks):", "")
 		if err != nil {
 			return err
 		}
+		if keystoreName == "" {
+			return fmt.Errorf("keystore filename cannot be empty")
+		}
 
-		validity, err := utils.PromptInput("Enter validity in days (optional, press Enter for default 10000): ")
+		validity, err := utils.SurveyInput("Enter validity in days:", "10000")
 		if err != nil {
 			return err
 		}
@@ -106,11 +110,11 @@ var CreateKeystoreCmd = &cobra.Command{
 
 		fmt.Println("\nGenerating keystore...")
 
-		// Build keytool command
+		// Build keytool command with PKCS12 format (recommended)
 		command := exec.Command("keytool",
 			"-genkeypair",
 			"-v",
-			"-storetype", "JKS",
+			"-storetype", "PKCS12",
 			"-keyalg", "RSA",
 			"-keysize", "2048",
 			"-validity", validity,

@@ -57,7 +57,16 @@ var ChangelogCreateCmd = &cobra.Command{
 			return err
 		}
 
-		if utils.FileExists("CHANGELOG.md") && !force {
+		// Interactive mode: ask for force if file exists and flag not set
+		if utils.FileExists("CHANGELOG.md") && !force && !cmd.Flags().Changed("force") {
+			force, err = utils.SurveyConfirm("CHANGELOG.md already exists. Overwrite?", false)
+			if err != nil {
+				return err
+			}
+			if !force {
+				return fmt.Errorf("operation cancelled")
+			}
+		} else if utils.FileExists("CHANGELOG.md") && !force {
 			return fmt.Errorf("CHANGELOG.md already exists. Use --force to overwrite")
 		}
 
@@ -109,23 +118,35 @@ var ChangelogRecordCmd = &cobra.Command{
 
 		// Interactive mode if no args provided
 		if len(args) < 2 {
-			version, err = utils.PromptInput("Enter version (e.g., 1.0.0): ")
+			version, err = utils.SurveyInput("Enter version (e.g., 1.0.0):", "")
 			if err != nil {
 				return err
 			}
 
-			summary, err = utils.PromptInput("Enter summary: ")
+			summary, err = utils.SurveyInput("Enter summary:", "")
 			if err != nil {
 				return err
 			}
 
-			// Ask for user feedback
-			feedback, err := utils.PromptInput("Any additional feedback/notes (optional): ")
+			// Ask for additional feedback
+			feedback, err := utils.SurveyInput("Any additional feedback/notes (optional):", "")
 			if err != nil {
 				return err
 			}
 			if feedback != "" {
 				summary = summary + " - " + feedback
+			}
+
+			// Ask for wip flag in interactive mode if not already set
+			if !cmd.Flags().Changed("wip") {
+				wip, err := utils.SurveyConfirm("Mark as Work In Progress (WIP)?", false)
+				if err != nil {
+					return err
+				}
+				err = cmd.Flags().Set("wip", fmt.Sprintf("%t", wip))
+				if err != nil {
+					return err
+				}
 			}
 		} else {
 			version = args[0]
@@ -153,7 +174,9 @@ var ChangelogRecordCmd = &cobra.Command{
 			status = " [WIP]"
 		}
 
-		newEntry := fmt.Sprintf(`## [%s]%s - %s
+		newEntry := fmt.Sprintf(`
+--------------------
+## [%s]%s - %s
 
 ### Added
 - %s
@@ -181,10 +204,10 @@ var ChangelogRecordCmd = &cobra.Command{
 
 		var newContent string
 		if idx > 0 {
-			newContent = content[:idx] + "\n" + newEntry + content[idx:]
+			newContent = content[:idx] + newEntry + content[idx:]
 		} else {
 			// If no Unreleased section, append at the end
-			newContent = content + "\n" + newEntry
+			newContent = content + newEntry
 		}
 
 		if err := utils.WriteFile("CHANGELOG.md", newContent); err != nil {

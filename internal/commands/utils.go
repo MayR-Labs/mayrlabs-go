@@ -19,8 +19,20 @@ var UUIDCmd = &cobra.Command{
 	Short: "Generate UUID v4",
 	Long:  "Generate a random UUID (Universally Unique Identifier) version 4",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		copyFlag, _ := cmd.Flags().GetBool("copy")
+
 		id := uuid.New()
 		fmt.Println(id.String())
+
+		// Copy to clipboard if requested
+		if copyFlag {
+			if err := utils.CopyToClipboard(id.String()); err != nil {
+				fmt.Println("⚠️  Failed to copy to clipboard:", err)
+			} else {
+				fmt.Println("✅ UUID copied to clipboard!")
+			}
+		}
+
 		return nil
 	},
 }
@@ -165,21 +177,52 @@ var HashCmd = &cobra.Command{
 // HashFileCmd generates hash of a file
 var HashFileCmd = &cobra.Command{
 	Use:   "hash-file [file]",
-	Short: "Generate hash of a file",
+	Short: "Generate hash of a file (interactive mode if no args)",
 	Long:  "Generate a hash of the provided file using the specified algorithm",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var filePath string
+		var err error
+
 		algorithm, err := cmd.Flags().GetString("algorithm")
 		if err != nil {
 			return err
 		}
-		if algorithm == "" {
-			algorithm = "sha256"
-		}
 
 		copyFlag, _ := cmd.Flags().GetBool("copy")
 
-		filePath := args[0]
+		// Interactive mode
+		if len(args) == 0 {
+			filePath, err = utils.SurveyInput("Enter file path:", "")
+			if err != nil {
+				return err
+			}
+			if filePath == "" {
+				return fmt.Errorf("file path cannot be empty")
+			}
+
+			algorithmChoice, err := utils.PromptSelect(
+				"Select hash algorithm:",
+				[]string{"sha256", "sha1", "md5"},
+			)
+			if err != nil {
+				return err
+			}
+			algorithm = algorithmChoice
+
+			// Ask for copy flag in interactive mode
+			if !cmd.Flags().Changed("copy") {
+				copyFlag, err = utils.SurveyConfirm("Copy hash to clipboard?", false)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			filePath = args[0]
+			if algorithm == "" {
+				algorithm = "sha256"
+			}
+		}
 
 		if !utils.FileExists(filePath) {
 			return fmt.Errorf("file does not exist: %s", filePath)
@@ -211,9 +254,21 @@ var ULIDCmd = &cobra.Command{
 	Short: "Generate ULID (Universally Unique Lexicographically Sortable Identifier)",
 	Long:  "Generate a random ULID with timestamp ordering",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		copyFlag, _ := cmd.Flags().GetBool("copy")
+
 		entropy := ulid.Monotonic(rand.Reader, 0)
 		id := ulid.MustNew(ulid.Timestamp(time.Now()), entropy)
 		fmt.Println(id.String())
+
+		// Copy to clipboard if requested
+		if copyFlag {
+			if err := utils.CopyToClipboard(id.String()); err != nil {
+				fmt.Println("⚠️  Failed to copy to clipboard:", err)
+			} else {
+				fmt.Println("✅ ULID copied to clipboard!")
+			}
+		}
+
 		return nil
 	},
 }
@@ -279,4 +334,8 @@ func init() {
 	HashFileCmd.Flags().BoolP("copy", "c", false, "Copy hash to clipboard")
 
 	PasswordCmd.Flags().BoolP("copy", "c", false, "Copy password to clipboard")
+
+	UUIDCmd.Flags().BoolP("copy", "c", false, "Copy UUID to clipboard")
+
+	ULIDCmd.Flags().BoolP("copy", "c", false, "Copy ULID to clipboard")
 }

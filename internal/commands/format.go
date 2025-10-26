@@ -20,13 +20,31 @@ var EditorConfigCmd = &cobra.Command{
 			return err
 		}
 
-		if utils.FileExists(".editorconfig") && !force {
+		// Check if file exists and ask for force in interactive mode
+		if utils.FileExists(".editorconfig") && !force && !cmd.Flags().Changed("force") {
+			force, err = utils.SurveyConfirm(".editorconfig already exists. Overwrite?", false)
+			if err != nil {
+				return err
+			}
+			if !force {
+				return fmt.Errorf("operation cancelled")
+			}
+		} else if utils.FileExists(".editorconfig") && !force {
 			return fmt.Errorf(".editorconfig already exists. Use --force to overwrite")
 		}
 
-		language := "general"
+		language := ""
 		if len(args) > 0 {
 			language = args[0]
+		} else {
+			// Interactive mode - prompt for language
+			language, err = utils.PromptSelect(
+				"Select language:",
+				[]string{"go", "javascript", "typescript", "python", "php", "dart", "flutter", "general"},
+			)
+			if err != nil {
+				return err
+			}
 		}
 
 		content := generateEditorConfig(language)
@@ -118,8 +136,12 @@ var FormatCmd = &cobra.Command{
 			language = args[0]
 		} else {
 			var err error
-			fmt.Println("Available languages: go, javascript, python, php, dart")
-			language, err = utils.PromptInput("Select language: ")
+
+			language, err = utils.PromptSelect(
+				"Select language:",
+				[]string{"go", "javascript", "typescript", "python", "php", "dart", "flutter"},
+			)
+
 			if err != nil {
 				return err
 			}

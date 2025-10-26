@@ -35,18 +35,26 @@ var CICmd = &cobra.Command{
 
 		// Prompt for missing values
 		if lang == "" {
-			fmt.Println("Available languages: go, javascript, python, php, flutter, dart")
 			var err error
-			lang, err = utils.PromptInput("Select language: ")
+
+			lang, err = utils.PromptSelect(
+				"Select language:",
+				[]string{"go", "javascript", "python", "php", "flutter", "dart"},
+			)
+
 			if err != nil {
 				return err
 			}
 		}
 
 		if vcs == "" {
-			fmt.Println("Available VCS: github, gitlab, circleci")
 			var err error
-			vcs, err = utils.PromptInput("Select VCS: ")
+
+			vcs, err = utils.PromptSelect(
+				"Select VCS:",
+				[]string{"github", "gitlab", "circleci"},
+			)
+
 			if err != nil {
 				return err
 			}
@@ -115,21 +123,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.21'
-    
+
     - name: Install dependencies
       run: go mod download
-    
+
     - name: Run tests
       run: go test -v ./...
-    
+
     - name: Build
       run: go build -v ./...
-    
+
     - name: Run linter
       uses: golangci/golangci-lint-action@v3
       with:
@@ -151,21 +159,21 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x, 18.x, 20.x]
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run tests
       run: npm test
-    
+
     - name: Build
       run: npm run build --if-present
 `
@@ -185,23 +193,23 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11']
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
     - name: Run tests
       run: pytest
-    
+
     - name: Lint with flake8
       run: |
         pip install flake8
@@ -222,21 +230,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.x'
-    
+
     - name: Install dependencies
       run: flutter pub get
-    
+
     - name: Run tests
       run: flutter test
-    
+
     - name: Analyze
       run: flutter analyze
-    
+
     - name: Build APK
       run: flutter build apk --release
 `
@@ -256,18 +264,18 @@ jobs:
     strategy:
       matrix:
         php-version: ['8.0', '8.1', '8.2']
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-version }}
-    
+
     - name: Install dependencies
       run: composer install
-    
+
     - name: Run tests
       run: vendor/bin/phpunit
 `
@@ -286,10 +294,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Build
       run: echo "Add your build steps here"
-    
+
     - name: Test
       run: echo "Add your test steps here"
 `
