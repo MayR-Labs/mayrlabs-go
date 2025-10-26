@@ -8,19 +8,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	osLinux   = "linux"
+	osDarwin  = "darwin"
+	osWindows = "windows"
+)
+
 // openURL opens a URL in the default browser
 func openURL(url string) error {
 	var cmd string
 	var args []string
 
 	switch runtime.GOOS {
-	case "darwin":
+	case osDarwin:
 		cmd = "open"
 		args = []string{url}
-	case "linux":
+	case osLinux:
 		cmd = "xdg-open"
 		args = []string{url}
-	case "windows":
+	case osWindows:
 		cmd = "cmd"
 		args = []string{"/c", "start", url}
 	default:
