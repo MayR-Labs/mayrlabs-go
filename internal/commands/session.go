@@ -377,14 +377,14 @@ func decryptSessionFile(filename string, password string) ([]byte, error) {
 		return nil, fmt.Errorf("password cannot be empty")
 	}
 
-// Decrypt using XOR with password
-key := []byte(password)
-decrypted := make([]byte, len(encrypted))
-for i := 0; i < len(encrypted); i++ {
-decrypted[i] = encrypted[i] ^ key[i%len(key)]
-}
+	// Decrypt using XOR with password
+	key := []byte(password)
+	decrypted := make([]byte, len(encrypted))
+	for i := 0; i < len(encrypted); i++ {
+		decrypted[i] = encrypted[i] ^ key[i%len(key)]
+	}
 
-return decrypted, nil
+	return decrypted, nil
 }
 
 // SecureSessionStartCmd starts a secure encrypted session
