@@ -131,14 +131,9 @@ var GitPruneStaleCmd = &cobra.Command{
 			branchesToDelete = staleBranches
 
 		case "Select Branches to Prune":
-			// Sort branches for better UX
-			sortedBranches := make([]string, len(staleBranches))
-			copy(sortedBranches, staleBranches)
-			// Note: We don't need to sort since they're already in a reasonable order from git
-
 			selected, err := utils.PromptMultiSelect(
 				"Select branches to delete:",
-				sortedBranches,
+				staleBranches,
 			)
 			if err != nil {
 				return err
