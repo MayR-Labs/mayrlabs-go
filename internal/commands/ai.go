@@ -38,7 +38,12 @@ var AISetupCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to create client: %w", err)
 		}
-		defer client.Close()
+		defer func(client *genai.Client) {
+			err := client.Close()
+			if err != nil {
+				return
+			}
+		}(client)
 
 		// Try to list models to validate the key
 		model := client.GenerativeModel("gemini-2.0-flash-exp")
@@ -92,7 +97,12 @@ var AICmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to create client: %w", err)
 		}
-		defer client.Close()
+		defer func(client *genai.Client) {
+			err := client.Close()
+			if err != nil {
+				return
+			}
+		}(client)
 
 		model := client.GenerativeModel("gemini-2.0-flash-exp")
 		resp, err := model.GenerateContent(ctx, genai.Text(query))
@@ -204,7 +214,12 @@ var AIAliasCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to open config file: %w", err)
 		}
-		defer file.Close()
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				return
+			}
+		}(file)
 
 		if _, err := file.WriteString(aliasLine); err != nil {
 			return fmt.Errorf("failed to write alias: %w", err)
@@ -277,7 +292,12 @@ var AIFileCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to create client: %w", err)
 		}
-		defer client.Close()
+		defer func(client *genai.Client) {
+			err := client.Close()
+			if err != nil {
+				return
+			}
+		}(client)
 
 		model := client.GenerativeModel("gemini-2.0-flash-exp")
 		prompt := fmt.Sprintf("%s\n\nFile: %s\n\n```\n%s\n```", message, filePath, content)

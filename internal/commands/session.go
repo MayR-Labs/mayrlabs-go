@@ -103,10 +103,16 @@ var SessionStartCmd = &cobra.Command{
 					return fmt.Errorf("failed to open session file: %w", err)
 				}
 				if _, err := file.WriteString(endContent); err != nil {
-					file.Close()
+					err := file.Close()
+					if err != nil {
+						return err
+					}
 					return fmt.Errorf("failed to write to session file: %w", err)
 				}
-				file.Close()
+				err = file.Close()
+				if err != nil {
+					return err
+				}
 
 				// Move session file to pwd
 				pwd, err := os.Getwd()
@@ -124,7 +130,10 @@ var SessionStartCmd = &cobra.Command{
 					if writeErr := os.WriteFile(destFile, content, 0o644); writeErr != nil {
 						return fmt.Errorf("failed to copy session file: %w", writeErr)
 					}
-					os.Remove(sessionFile)
+					err := os.Remove(sessionFile)
+					if err != nil {
+						return err
+					}
 				}
 
 				fmt.Printf("\n✅ Session ended and saved to: %s\n", destFile)
@@ -156,8 +165,11 @@ var SessionStartCmd = &cobra.Command{
 				}
 
 				model := client.GenerativeModel("gemini-2.0-flash-exp")
-				resp, err := model.GenerateContent(ctx, genai.Text(question))
-				client.Close()
+				resp, _ := model.GenerateContent(ctx, genai.Text(question))
+				err = client.Close()
+				if err != nil {
+					return err
+				}
 
 				if err != nil {
 					fmt.Printf("❌ Failed to generate content: %v\n", err)
@@ -186,8 +198,14 @@ var SessionStartCmd = &cobra.Command{
 					fmt.Printf("❌ Failed to record interaction: %v\n", err)
 					continue
 				}
-				file.WriteString(entry)
-				file.Close()
+				_, err = file.WriteString(entry)
+				if err != nil {
+					return err
+				}
+				err = file.Close()
+				if err != nil {
+					return err
+				}
 
 			case "NOTE":
 				if len(parts) < 2 {
@@ -204,8 +222,14 @@ var SessionStartCmd = &cobra.Command{
 					fmt.Printf("❌ Failed to record note: %v\n", err)
 					continue
 				}
-				file.WriteString(entry)
-				file.Close()
+				_, err = file.WriteString(entry)
+				if err != nil {
+					return err
+				}
+				err = file.Close()
+				if err != nil {
+					return err
+				}
 
 				fmt.Println("✅ Note recorded")
 

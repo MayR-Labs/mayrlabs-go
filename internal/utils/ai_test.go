@@ -20,13 +20,25 @@ func setupTestHome(t *testing.T) (testHome string, cleanup func()) {
 		originalHome = os.Getenv("USERPROFILE") // Windows
 	}
 
-	os.Setenv("HOME", testHome)
-	os.Setenv("USERPROFILE", testHome)
+	err := os.Setenv("HOME", testHome)
+	if err != nil {
+		return "", nil
+	}
+	err = os.Setenv("USERPROFILE", testHome)
+	if err != nil {
+		return "", nil
+	}
 
 	cleanup = func() {
 		if originalHome != "" {
-			os.Setenv("HOME", originalHome)
-			os.Setenv("USERPROFILE", originalHome)
+			err := os.Setenv("HOME", originalHome)
+			if err != nil {
+				return
+			}
+			err = os.Setenv("USERPROFILE", originalHome)
+			if err != nil {
+				return
+			}
 		}
 	}
 	return testHome, cleanup
