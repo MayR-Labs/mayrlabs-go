@@ -313,10 +313,10 @@ var RandomIntCmd = &cobra.Command{
 		rangeSize := end - start + 1
 		n, err := rand.Int(rand.Reader, big.NewInt(rangeSize))
 		if err != nil {
-			// Fallback to math/rand if crypto/rand fails
-			mathrand.Seed(time.Now().UnixNano())
 			result := mathrand.Int63n(rangeSize) + start
+
 			fmt.Println(result)
+
 			return nil
 		}
 

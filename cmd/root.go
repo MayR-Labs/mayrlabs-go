@@ -57,6 +57,20 @@ func init() {
 	rootCmd.AddCommand(commands.Base64FileCmd)
 	rootCmd.AddCommand(commands.Base64DecodeToFileCmd)
 
+	// New commands for v0.5.0 - AI features
+	rootCmd.AddCommand(commands.AISetupCmd)
+	rootCmd.AddCommand(commands.AICmd)
+	rootCmd.AddCommand(commands.AIClearCmd)
+	rootCmd.AddCommand(commands.AIAliasCmd)
+	rootCmd.AddCommand(commands.AIFileCmd)
+
+	// New commands for v0.5.0 - Session management
+	rootCmd.AddCommand(commands.SessionStartCmd)
+
+	// New commands for v0.5.0 - Alias management
+	rootCmd.AddCommand(commands.AliasListCmd)
+	rootCmd.AddCommand(commands.AliasClearCmd)
+
 	// Group commands
 	rootCmd.AddCommand(commands.GitCmd)
 	rootCmd.AddCommand(commands.EnvCmd)
