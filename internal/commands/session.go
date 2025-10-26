@@ -337,35 +337,45 @@ func getSessionEndMessage(duration time.Duration) string {
 
 // encryptSessionFile encrypts a session file with the given password
 func encryptSessionFile(filename string, password string) error {
-// Read the file content
-content, err := os.ReadFile(filename)
-if err != nil {
-return fmt.Errorf("failed to read file: %w", err)
-}
+	// Read the file content
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
 
-// Create a simple XOR encryption with password hash for basic security
-// Note: This is a basic implementation. For production, use proper encryption like AES.
-key := []byte(password)
-encrypted := make([]byte, len(content))
-for i := 0; i < len(content); i++ {
-encrypted[i] = content[i] ^ key[i%len(key)]
-}
+	// Ensure password is not empty
+	if password == "" {
+		return fmt.Errorf("password cannot be empty")
+	}
 
-// Write encrypted content back
-if err := os.WriteFile(filename, encrypted, 0o600); err != nil {
-return fmt.Errorf("failed to write encrypted file: %w", err)
-}
+	// Create a simple XOR encryption with password hash for basic security
+	// Note: This is a basic implementation. For production, use proper encryption like AES.
+	key := []byte(password)
+	encrypted := make([]byte, len(content))
+	for i := 0; i < len(content); i++ {
+		encrypted[i] = content[i] ^ key[i%len(key)]
+	}
 
-return nil
+	// Write encrypted content back
+	if err := os.WriteFile(filename, encrypted, 0o600); err != nil {
+		return fmt.Errorf("failed to write encrypted file: %w", err)
+	}
+
+	return nil
 }
 
 // decryptSessionFile decrypts a session file with the given password
 func decryptSessionFile(filename string, password string) ([]byte, error) {
-// Read encrypted content
-encrypted, err := os.ReadFile(filename)
-if err != nil {
-return nil, fmt.Errorf("failed to read file: %w", err)
-}
+	// Read encrypted content
+	encrypted, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+
+	// Ensure password is not empty
+	if password == "" {
+		return nil, fmt.Errorf("password cannot be empty")
+	}
 
 // Decrypt using XOR with password
 key := []byte(password)
