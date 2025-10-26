@@ -6,6 +6,32 @@ import (
 	"testing"
 )
 
+// setupTestHome creates a temporary home directory for testing and returns a cleanup function
+func setupTestHome(t *testing.T) (testHome string, cleanup func()) {
+	t.Helper()
+	tmpDir := t.TempDir()
+	testHome = filepath.Join(tmpDir, "test_home")
+	if err := os.MkdirAll(testHome, 0o700); err != nil {
+		t.Fatalf("Failed to create test home: %v", err)
+	}
+
+	originalHome := os.Getenv("HOME")
+	if originalHome == "" {
+		originalHome = os.Getenv("USERPROFILE") // Windows
+	}
+
+	os.Setenv("HOME", testHome)
+	os.Setenv("USERPROFILE", testHome)
+
+	cleanup = func() {
+		if originalHome != "" {
+			os.Setenv("HOME", originalHome)
+			os.Setenv("USERPROFILE", originalHome)
+		}
+	}
+	return testHome, cleanup
+}
+
 func TestGetConfigDir(t *testing.T) {
 	configDir, err := GetConfigDir()
 	if err != nil {
@@ -23,28 +49,8 @@ func TestGetConfigDir(t *testing.T) {
 }
 
 func TestStoreAndGetAPIKey(t *testing.T) {
-	// Create a temporary config dir for testing
-	tmpDir := t.TempDir()
-	originalHome := os.Getenv("HOME")
-	if originalHome == "" {
-		originalHome = os.Getenv("USERPROFILE") // Windows
-	}
-
-	// Set up a temporary home directory
-	testHome := filepath.Join(tmpDir, "test_home")
-	if err := os.MkdirAll(testHome, 0o700); err != nil {
-		t.Fatalf("Failed to create test home: %v", err)
-	}
-
-	// Save and restore HOME/USERPROFILE
-	defer func() {
-		if originalHome != "" {
-			os.Setenv("HOME", originalHome)
-			os.Setenv("USERPROFILE", originalHome)
-		}
-	}()
-	os.Setenv("HOME", testHome)
-	os.Setenv("USERPROFILE", testHome)
+	_, cleanup := setupTestHome(t)
+	defer cleanup()
 
 	testKey := "test-api-key-12345"
 
@@ -78,26 +84,8 @@ func TestStoreAndGetAPIKey(t *testing.T) {
 }
 
 func TestClearAPIKeyNotFound(t *testing.T) {
-	// Create a temporary config dir for testing
-	tmpDir := t.TempDir()
-	testHome := filepath.Join(tmpDir, "test_home")
-	if err := os.MkdirAll(testHome, 0o700); err != nil {
-		t.Fatalf("Failed to create test home: %v", err)
-	}
-
-	originalHome := os.Getenv("HOME")
-	if originalHome == "" {
-		originalHome = os.Getenv("USERPROFILE")
-	}
-
-	defer func() {
-		if originalHome != "" {
-			os.Setenv("HOME", originalHome)
-			os.Setenv("USERPROFILE", originalHome)
-		}
-	}()
-	os.Setenv("HOME", testHome)
-	os.Setenv("USERPROFILE", testHome)
+	_, cleanup := setupTestHome(t)
+	defer cleanup()
 
 	// Try to clear non-existent API key
 	err := ClearAPIKey()
@@ -107,26 +95,8 @@ func TestClearAPIKeyNotFound(t *testing.T) {
 }
 
 func TestGetAPIKeyNotFound(t *testing.T) {
-	// Create a temporary config dir for testing
-	tmpDir := t.TempDir()
-	testHome := filepath.Join(tmpDir, "test_home")
-	if err := os.MkdirAll(testHome, 0o700); err != nil {
-		t.Fatalf("Failed to create test home: %v", err)
-	}
-
-	originalHome := os.Getenv("HOME")
-	if originalHome == "" {
-		originalHome = os.Getenv("USERPROFILE")
-	}
-
-	defer func() {
-		if originalHome != "" {
-			os.Setenv("HOME", originalHome)
-			os.Setenv("USERPROFILE", originalHome)
-		}
-	}()
-	os.Setenv("HOME", testHome)
-	os.Setenv("USERPROFILE", testHome)
+	_, cleanup := setupTestHome(t)
+	defer cleanup()
 
 	// Try to get non-existent API key
 	_, err := GetAPIKey()
