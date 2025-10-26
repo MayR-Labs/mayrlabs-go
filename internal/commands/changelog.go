@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/spf13/cobra"
-
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 // ChangelogCmd is the parent command for changelog operations
@@ -17,7 +16,6 @@ var ChangelogCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Help display errors are not critical
 		err := cmd.Help()
-
 		if err != nil {
 			return
 		}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
-
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )

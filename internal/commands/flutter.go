@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
-
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 // FlutterCmd is the parent command for Flutter operations
@@ -17,7 +16,6 @@ var FlutterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Help display errors are not critical
 		err := cmd.Help()
-
 		if err != nil {
 			return
 		}

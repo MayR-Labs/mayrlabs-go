@@ -5,9 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
-
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 const (

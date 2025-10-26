@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/MayR-Labs/mayrlabs-go/internal/commands"
+	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
@@ -19,7 +18,6 @@ project structure consistent — all in seconds.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			err := cmd.Help()
-
 			if err != nil {
 				return
 			}

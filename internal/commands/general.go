@@ -5,9 +5,8 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/spf13/cobra"
-
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 // DNSClearCmd clears the DNS cache
@@ -48,7 +47,11 @@ var DNSClearCmd = &cobra.Command{
 				command = exec.Command("sudo", cmdArgs...)
 				output, err = command.CombinedOutput()
 				if err != nil {
-					return fmt.Errorf("failed to clear DNS cache: %w\nOutput: %s", err, string(output))
+					return fmt.Errorf(
+						"failed to clear DNS cache: %w\nOutput: %s",
+						err,
+						string(output),
+					)
 				}
 			} else {
 				return fmt.Errorf("failed to clear DNS cache: %w\nOutput: %s", err, string(output))
@@ -76,7 +79,9 @@ var CreateKeystoreCmd = &cobra.Command{
 			return err
 		}
 
-		keystoreName, err := utils.PromptInput("Enter keystore filename (e.g., my-release-key.jks): ")
+		keystoreName, err := utils.PromptInput(
+			"Enter keystore filename (e.g., my-release-key.jks): ",
+		)
 		if err != nil {
 			return err
 		}

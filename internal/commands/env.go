@@ -6,9 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/spf13/cobra"
-
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 // EnvCmd is the parent command for environment operations
@@ -19,7 +18,6 @@ var EnvCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Help display errors are not critical
 		err := cmd.Help()
-
 		if err != nil {
 			return
 		}
@@ -125,7 +123,12 @@ var EnvValidateCmd = &cobra.Command{
 
 			// Check for duplicate keys
 			if prevLine, exists := seen[key]; exists {
-				fmt.Printf("❌ Line %d: Duplicate key '%s' (first seen on line %d)\n", lineNum, key, prevLine)
+				fmt.Printf(
+					"❌ Line %d: Duplicate key '%s' (first seen on line %d)\n",
+					lineNum,
+					key,
+					prevLine,
+				)
 				issues++
 			}
 			seen[key] = lineNum

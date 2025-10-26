@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/spf13/cobra"
-
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 // JSCmd is the parent command for JavaScript operations
@@ -16,7 +15,6 @@ var JSCmd = &cobra.Command{
 	Long:  "Commands for managing JavaScript/Node.js projects",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Help()
-
 		if err != nil {
 			return
 		}

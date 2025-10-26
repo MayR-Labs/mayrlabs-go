@@ -14,7 +14,6 @@ var PHPCmd = &cobra.Command{
 	Long:  "Commands for managing PHP projects (linting, formatting, etc.)",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Help()
-
 		if err != nil {
 			return
 		}
