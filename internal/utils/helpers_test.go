@@ -125,16 +125,13 @@ func TestFileExists(t *testing.T) {
 }
 
 func TestHashFile(t *testing.T) {
-	// Create a temporary test file
-	tmpFile := "/tmp/test_hash_file.txt"
+	// Create a temporary test file using t.TempDir()
+	tmpDir := t.TempDir()
+	tmpFile := tmpDir + "/test_hash_file.txt"
 	content := "test content for hashing"
 	if err := WriteFile(tmpFile, content); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
-	defer func() {
-		// Clean up
-		_ = WriteFile(tmpFile, "")
-	}()
 
 	tests := []struct {
 		name      string
@@ -177,7 +174,7 @@ func TestHashFile(t *testing.T) {
 	}
 
 	// Test non-existent file
-	_, err := HashFile("/tmp/nonexistent-file-12345.txt", "sha256")
+	_, err := HashFile(tmpDir+"/nonexistent-file-12345.txt", "sha256")
 	if err == nil {
 		t.Errorf("HashFile() should return error for non-existent file")
 	}
