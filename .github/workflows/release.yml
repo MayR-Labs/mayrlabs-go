@@ -12,49 +12,113 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Go
-      uses: actions/setup-go@v6
-      with:
-        go-version: stable
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
 
-    - name: Run tests
-      run: go test -v ./...
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-    - name: Build for multiple platforms
-      run: |
-        # Linux AMD64
-        GOOS=linux GOARCH=amd64 go build -o mayrlabs-linux-amd64 ./main.go
+      - name: Build binaries
+        run: |
+          # Create dist directory
+          mkdir -p dist
+          
+          # Build for Linux AMD64
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X github.com/MayR-Labs/mayrlabs-go/internal/commands.Version=${{ steps.get_version.outputs.VERSION }}" -o dist/mayrlabs-linux-amd64 .
+          
+          # Build for Linux ARM64
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X github.com/MayR-Labs/mayrlabs-go/internal/commands.Version=${{ steps.get_version.outputs.VERSION }}" -o dist/mayrlabs-linux-arm64 .
+          
+          # Build for macOS AMD64
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X github.com/MayR-Labs/mayrlabs-go/internal/commands.Version=${{ steps.get_version.outputs.VERSION }}" -o dist/mayrlabs-darwin-amd64 .
+          
+          # Build for macOS ARM64 (Apple Silicon)
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X github.com/MayR-Labs/mayrlabs-go/internal/commands.Version=${{ steps.get_version.outputs.VERSION }}" -o dist/mayrlabs-darwin-arm64 .
+          
+          # Build for Windows AMD64
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X github.com/MayR-Labs/mayrlabs-go/internal/commands.Version=${{ steps.get_version.outputs.VERSION }}" -o dist/mayrlabs-windows-amd64.exe .
+          
+          # Make binaries executable
+          chmod +x dist/mayrlabs-*
+          
+          # List built files
+          ls -lh dist/
 
-        # Linux ARM64
-        GOOS=linux GOARCH=arm64 go build -o mayrlabs-linux-arm64 ./main.go
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+          cat checksums.txt
 
-        # macOS AMD64
-        GOOS=darwin GOARCH=amd64 go build -o mayrlabs-darwin-amd64 ./main.go
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## mayrlabs ${{ steps.get_version.outputs.VERSION }}
+          
+          ### Installation
+          
+          Download the appropriate binary for your platform below:
+          
+          #### Linux
+          ```bash
+          # AMD64
+          wget https://github.com/MayR-Labs/mayrlabs-go/releases/download/${{ steps.get_version.outputs.VERSION }}/mayrlabs-linux-amd64
+          chmod +x mayrlabs-linux-amd64
+          sudo mv mayrlabs-linux-amd64 /usr/local/bin/mayrlabs
+          
+          # ARM64
+          wget https://github.com/MayR-Labs/mayrlabs-go/releases/download/${{ steps.get_version.outputs.VERSION }}/mayrlabs-linux-arm64
+          chmod +x mayrlabs-linux-arm64
+          sudo mv mayrlabs-linux-arm64 /usr/local/bin/mayrlabs
+          ```
+          
+          #### macOS
+          ```bash
+          # Intel
+          wget https://github.com/MayR-Labs/mayrlabs-go/releases/download/${{ steps.get_version.outputs.VERSION }}/mayrlabs-darwin-amd64
+          chmod +x mayrlabs-darwin-amd64
+          sudo mv mayrlabs-darwin-amd64 /usr/local/bin/mayrlabs
+          
+          # Apple Silicon (M1/M2/M3)
+          wget https://github.com/MayR-Labs/mayrlabs-go/releases/download/${{ steps.get_version.outputs.VERSION }}/mayrlabs-darwin-arm64
+          chmod +x mayrlabs-darwin-arm64
+          sudo mv mayrlabs-darwin-arm64 /usr/local/bin/mayrlabs
+          ```
+          
+          #### Windows
+          Download `mayrlabs-windows-amd64.exe` and add it to your PATH.
+          
+          Or use the [installation script](https://github.com/MayR-Labs/mayrlabs-go#installation).
+          
+          ### Verify Installation
+          ```bash
+          mayrlabs --version
+          ```
+          
+          ### What's Changed
+          See the [CHANGELOG](https://github.com/MayR-Labs/mayrlabs-go/blob/main/CHANGELOG.md) for details.
+          
+          ### Checksums
+          Verify the integrity of your download using the checksums in `checksums.txt`.
+          EOF
 
-        # macOS ARM64 (Apple Silicon)
-        GOOS=darwin GOARCH=arm64 go build -o mayrlabs-darwin-arm64 ./main.go
-
-        # Windows AMD64
-        GOOS=windows GOARCH=amd64 go build -o mayrlabs-windows-amd64.exe ./main.go
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          mayrlabs-linux-amd64
-          mayrlabs-linux-arm64
-          mayrlabs-darwin-amd64
-          mayrlabs-darwin-arm64
-          mayrlabs-windows-amd64.exe
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/*
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

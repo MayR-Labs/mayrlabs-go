@@ -19,7 +19,25 @@ It aims to provide developers with a unified interface for generating configs, f
 
 ## 📦 Installation
 
-### Using Go Install (Recommended)
+### Using Installation Script (Recommended)
+
+The easiest way to install mayrlabs is using our installation script:
+
+```bash
+# Using curl
+curl -sSL https://raw.githubusercontent.com/MayR-Labs/mayrlabs-go/main/install.sh | bash
+
+# Or using wget
+wget -qO- https://raw.githubusercontent.com/MayR-Labs/mayrlabs-go/main/install.sh | bash
+```
+
+The script automatically:
+- Detects your operating system and architecture
+- Downloads the latest release
+- Installs the binary to an appropriate location
+- Verifies the installation
+
+### Using Go Install
 
 If you have Go 1.17+ installed:
 
@@ -27,7 +45,31 @@ If you have Go 1.17+ installed:
 go install github.com/MayR-Labs/mayrlabs-go@latest
 ```
 
-This will install the `mayrlabs` binary to your `$GOPATH/bin` directory. Make sure this directory is in your `PATH`.
+**Note:** This will install the binary as `mayrlabs-go` (not `mayrlabs`) in your `$GOPATH/bin` directory. You can create an alias or symlink:
+
+```bash
+# Create an alias (add to your ~/.bashrc or ~/.zshrc)
+alias mayrlabs='mayrlabs-go'
+
+# Or create a symlink
+ln -s $(which mayrlabs-go) $(dirname $(which mayrlabs-go))/mayrlabs
+```
+
+**Ensure `$GOPATH/bin` is in your PATH:**
+
+Add this to your shell configuration file (`~/.bashrc`, `~/.zshrc`, or `~/.profile`):
+
+```bash
+export PATH="$GOPATH/bin:$PATH"
+# or if GOPATH is not set
+export PATH="$HOME/go/bin:$PATH"
+```
+
+Then reload your shell configuration:
+
+```bash
+source ~/.bashrc  # or ~/.zshrc, ~/.profile depending on your shell
+```
 
 ### Download Pre-built Binaries
 
@@ -67,6 +109,7 @@ sudo mv mayrlabs /usr/local/bin/
 ### Verify Installation
 
 ```bash
+mayrlabs --version
 mayrlabs --help
 ```
 
@@ -192,6 +235,9 @@ mayrlabs git prune-stale
 | `mayrlabs add-license`              | Create a LICENSE file based on selected type, year, and author         |
 | `mayrlabs editor-config [language]` | Generate `.editorconfig` for a specific language (supports `--force`)  |
 | `mayrlabs quote`                    | Display a random motivational quote for developers                     |
+| `mayrlabs version`                  | Display the version of mayrlabs CLI                                    |
+| `mayrlabs visit`                    | Open the MayR Labs website in your browser                             |
+| `mayrlabs github`                   | Open the mayrlabs-go GitHub repository in your browser                 |
 
 ---
 
@@ -386,6 +432,9 @@ mayrlabs <command> --help
 | `mayrlabs hash [string]`            | Generate hash of a string using md5, sha1, or sha256.                  |
 | `mayrlabs uuid`                     | Generate UUID v4.                                                      |
 | `mayrlabs password [length]`        | Generate a random password of specified length (default: 16).          |
+| `mayrlabs version`                  | Display the version of mayrlabs CLI.                                   |
+| `mayrlabs visit`                    | Open the MayR Labs website in your browser.                            |
+| `mayrlabs github`                   | Open the mayrlabs-go GitHub repository in your browser.                |
 
 ---
 
@@ -450,9 +499,11 @@ mayrlabs <command> --help
 
 ## 🪄 Bonus (Fun / Easter Eggs)
 
-| Command          | Description                                         |
-| ---------------- | --------------------------------------------------- |
-| `mayrlabs quote` | Display a random motivational quote for developers. |
+| Command           | Description                                         |
+| ----------------- | --------------------------------------------------- |
+| `mayrlabs quote`  | Display a random motivational quote for developers. |
+| `mayrlabs visit`  | Open the MayR Labs website in your browser.         |
+| `mayrlabs github` | Open the GitHub repository in your browser.         |
 
 ---
 
