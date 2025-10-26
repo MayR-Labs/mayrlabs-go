@@ -3,12 +3,10 @@ version: "2"
 linters:
   enable:
     - errcheck
-    # - gosimple
     - govet
     - ineffassign
     - staticcheck
     - unused
-    # - goimports
     - misspell
     - goconst
     - gocritic
@@ -16,15 +14,6 @@ linters:
     - gosec
     - unconvert
     - dupl
-    # exportloopref removed — deprecated since Go 1.22, now handled by built-in loopvar check
-
-formatters:
-  enable:
-    - gci
-    - gofmt
-    - gofumpt
-    - goimports
-    - golines
 
 issues:
   max-issues-per-linter: 50
