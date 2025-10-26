@@ -42,6 +42,9 @@ func init() {
 	rootCmd.AddCommand(commands.UUIDCmd)
 	rootCmd.AddCommand(commands.PasswordCmd)
 	rootCmd.AddCommand(commands.QuoteCmd)
+	rootCmd.AddCommand(commands.VersionCmd)
+	rootCmd.AddCommand(commands.VisitCmd)
+	rootCmd.AddCommand(commands.GithubCmd)
 
 	// Group commands
 	rootCmd.AddCommand(commands.GitCmd)
