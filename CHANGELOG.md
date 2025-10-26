@@ -49,8 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `create-keystore` - proper error message when filename is empty
 
 ----
-
-----
 ## [v0.2.0] - 2025-10-26
 
 ### Added

@@ -260,8 +260,8 @@ mayrlabs git prune-stale
 
 | Command                             | Description                                                            |
 | ----------------------------------- | ---------------------------------------------------------------------- |
-| `mayrlabs uuid [--copy]`            | Generate UUID v4 (optional --copy flag to copy to clipboard)          |
-| `mayrlabs ulid [--copy]`            | Generate ULID (optional --copy flag to copy to clipboard)             |
+| `mayrlabs uuid`                     | Generate UUID v4 with optional --copy flag to copy to clipboard       |
+| `mayrlabs ulid`                     | Generate ULID with optional --copy flag to copy to clipboard          |
 | `mayrlabs password [length]`        | Generate a random password of specified length (default: 16)           |
 | `mayrlabs hash [string]`            | Generate hash of a string using md5, sha1, or sha256                   |
 | `mayrlabs hash-file [file]`         | Generate hash of a file (interactive mode if no args)                  |
@@ -292,8 +292,8 @@ mayrlabs git prune-stale
 
 | Command                                    | Description                                                  |
 | ------------------------------------------ | ------------------------------------------------------------ |
-| `mayrlabs base64 encode/decode [string]`   | Encode or decode a string using base64 (with --copy flag)   |
-| `mayrlabs base64-file [path]`              | Encode a file to base64 (with --copy flag)                  |
+| `mayrlabs base64 encode/decode [string]`   | Encode or decode a string using base64 with optional --copy flag |
+| `mayrlabs base64-file [path]`              | Encode a file to base64 with optional --copy flag           |
 | `mayrlabs base64-decode-to-file [string]`  | Decode base64 string and write to a file                    |
 
 ---
