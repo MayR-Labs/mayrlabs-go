@@ -3,6 +3,7 @@ module github.com/MayR-Labs/mayrlabs-go
 go 1.17
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/atotto/clipboard v0.1.4
 	github.com/google/uuid v1.6.0
 	github.com/oklog/ulid/v2 v2.1.1
@@ -10,7 +11,6 @@ require (
 )
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
