@@ -64,10 +64,17 @@ echo ""
 
 # Get latest release version
 echo "Fetching latest release..."
-LATEST_VERSION=$(curl -s "$RELEASE_URL" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+if command -v jq >/dev/null 2>&1; then
+    # Use jq if available for robust JSON parsing
+    LATEST_VERSION=$(curl -s "$RELEASE_URL" | jq -r '.tag_name')
+else
+    # Fallback to grep/sed parsing
+    LATEST_VERSION=$(curl -s "$RELEASE_URL" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+fi
 
-if [ -z "$LATEST_VERSION" ]; then
+if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" = "null" ]; then
     echo -e "${RED}Failed to fetch latest release version${NC}"
+    echo "Please check your internet connection and try again."
     exit 1
 fi
 
