@@ -49,6 +49,14 @@ func init() {
 	rootCmd.AddCommand(commands.VisitCmd)
 	rootCmd.AddCommand(commands.GithubCmd)
 
+	// New commands for v0.4.0
+	rootCmd.AddCommand(commands.RollDiceCmd)
+	rootCmd.AddCommand(commands.AliasCmd)
+	rootCmd.AddCommand(commands.UpgradeCmd)
+	rootCmd.AddCommand(commands.Base64Cmd)
+	rootCmd.AddCommand(commands.Base64FileCmd)
+	rootCmd.AddCommand(commands.Base64DecodeToFileCmd)
+
 	// Group commands
 	rootCmd.AddCommand(commands.GitCmd)
 	rootCmd.AddCommand(commands.EnvCmd)
