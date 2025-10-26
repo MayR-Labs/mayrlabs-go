@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -127,7 +128,7 @@ func TestFileExists(t *testing.T) {
 func TestHashFile(t *testing.T) {
 	// Create a temporary test file using t.TempDir()
 	tmpDir := t.TempDir()
-	tmpFile := tmpDir + "/test_hash_file.txt"
+	tmpFile := filepath.Join(tmpDir, "test_hash_file.txt")
 	content := "test content for hashing"
 	if err := WriteFile(tmpFile, content); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
@@ -174,7 +175,7 @@ func TestHashFile(t *testing.T) {
 	}
 
 	// Test non-existent file
-	_, err := HashFile(tmpDir+"/nonexistent-file-12345.txt", "sha256")
+	_, err := HashFile(filepath.Join(tmpDir, "nonexistent-file-12345.txt"), "sha256")
 	if err == nil {
 		t.Errorf("HashFile() should return error for non-existent file")
 	}
