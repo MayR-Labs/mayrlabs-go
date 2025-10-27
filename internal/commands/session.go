@@ -29,7 +29,7 @@ var SessionStartCmd = &cobra.Command{
 func slugify(text string, maxLength int) string {
 	// Convert to lowercase
 	slug := strings.ToLower(text)
-	
+
 	// Replace spaces and special characters with hyphens
 	slug = strings.Map(func(r rune) rune {
 		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
@@ -37,23 +37,23 @@ func slugify(text string, maxLength int) string {
 		}
 		return '-'
 	}, slug)
-	
+
 	// Remove consecutive hyphens
 	for strings.Contains(slug, "--") {
 		slug = strings.ReplaceAll(slug, "--", "-")
 	}
-	
+
 	// Trim hyphens from ends
 	slug = strings.Trim(slug, "-")
-	
+
 	// Truncate to max length
 	if len(slug) > maxLength {
 		slug = slug[:maxLength]
 	}
-	
+
 	// Trim trailing hyphen if truncation created one
 	slug = strings.TrimRight(slug, "-")
-	
+
 	return slug
 }
 
@@ -423,10 +423,10 @@ func getSessionEndMessage(duration time.Duration) string {
 func extractSummaryFromFilename(filename string) string {
 	// Remove .md extension
 	name := strings.TrimSuffix(filename, ".md")
-	
+
 	// Split by hyphens
 	parts := strings.Split(name, "-")
-	
+
 	// session-YYYYMMDD-HHMMSS-summary format (at least 4 parts)
 	if len(parts) >= 4 {
 		// Join everything after the timestamp as the summary
@@ -439,7 +439,7 @@ func extractSummaryFromFilename(filename string) string {
 		}
 		return summary
 	}
-	
+
 	// Old format or no summary
 	return ""
 }
@@ -507,470 +507,470 @@ func decryptSessionFile(filename string, password string) ([]byte, error) {
 
 // SecureSessionStartCmd starts a secure encrypted session
 var SecureSessionStartCmd = &cobra.Command{
-Use:   "secure-session-start [summary]",
-Short: "Start an encrypted interactive development session",
-Long:  "Start an encrypted session that records AI interactions and notes",
-RunE: func(cmd *cobra.Command, args []string) error {
-// Get password
-password, err := utils.SurveyPassword("Enter password for session encryption:")
-if err != nil {
-return err
-}
+	Use:   "secure-session-start [summary]",
+	Short: "Start an encrypted interactive development session",
+	Long:  "Start an encrypted session that records AI interactions and notes",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Get password
+		password, err := utils.SurveyPassword("Enter password for session encryption:")
+		if err != nil {
+			return err
+		}
 
-if password == "" {
-return fmt.Errorf("password cannot be empty")
-}
+		if password == "" {
+			return fmt.Errorf("password cannot be empty")
+		}
 
-// Get password hint
-passwordHint, err := utils.SurveyInput("Enter password hint:", "")
-if err != nil {
-return err
-}
+		// Get password hint
+		passwordHint, err := utils.SurveyInput("Enter password hint:", "")
+		if err != nil {
+			return err
+		}
 
-return startSession(args, true, password, passwordHint)
-},
+		return startSession(args, true, password, passwordHint)
+	},
 }
 
 // SessionsCmd lists and manages sessions
 var SessionsCmd = &cobra.Command{
-Use:   "sessions",
-Short: "List and manage sessions",
-Long:  "List all sessions and perform actions like copy, delete, or view",
-RunE: func(cmd *cobra.Command, args []string) error {
-configDir, err := utils.GetConfigDir()
-if err != nil {
-return err
-}
+	Use:   "sessions",
+	Short: "List and manage sessions",
+	Long:  "List all sessions and perform actions like copy, delete, or view",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		configDir, err := utils.GetConfigDir()
+		if err != nil {
+			return err
+		}
 
-sessionsDir := filepath.Join(configDir, "sessions")
-if err := os.MkdirAll(sessionsDir, 0o700); err != nil {
-return fmt.Errorf("failed to create sessions directory: %w", err)
-}
+		sessionsDir := filepath.Join(configDir, "sessions")
+		if err := os.MkdirAll(sessionsDir, 0o700); err != nil {
+			return fmt.Errorf("failed to create sessions directory: %w", err)
+		}
 
-// List session files
-files, err := os.ReadDir(sessionsDir)
-if err != nil {
-return fmt.Errorf("failed to read sessions directory: %w", err)
-}
+		// List session files
+		files, err := os.ReadDir(sessionsDir)
+		if err != nil {
+			return fmt.Errorf("failed to read sessions directory: %w", err)
+		}
 
-if len(files) == 0 {
-fmt.Println("📁 No sessions found")
-return nil
-}
+		if len(files) == 0 {
+			fmt.Println("📁 No sessions found")
+			return nil
+		}
 
-// Build options for selection
-var options []string
-var fileNames []string
-for _, file := range files {
-if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-fileNames = append(fileNames, file.Name())
-options = append(options, formatSessionOption(file.Name()))
-}
-}
+		// Build options for selection
+		var options []string
+		var fileNames []string
+		for _, file := range files {
+			if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
+				fileNames = append(fileNames, file.Name())
+				options = append(options, formatSessionOption(file.Name()))
+			}
+		}
 
-if len(options) == 0 {
-fmt.Println("📁 No sessions found")
-return nil
-}
+		if len(options) == 0 {
+			fmt.Println("📁 No sessions found")
+			return nil
+		}
 
-// Let user select a session
-selectedOption, err := utils.PromptSelect("Select a session:", options)
-if err != nil {
-return err
-}
+		// Let user select a session
+		selectedOption, err := utils.PromptSelect("Select a session:", options)
+		if err != nil {
+			return err
+		}
 
-// Find the corresponding filename
-selectedIndex := -1
-for i, opt := range options {
-if opt == selectedOption {
-selectedIndex = i
-break
-}
-}
-if selectedIndex == -1 {
-return fmt.Errorf("failed to find selected session")
-}
-selectedSession := fileNames[selectedIndex]
+		// Find the corresponding filename
+		selectedIndex := -1
+		for i, opt := range options {
+			if opt == selectedOption {
+				selectedIndex = i
+				break
+			}
+		}
+		if selectedIndex == -1 {
+			return fmt.Errorf("failed to find selected session")
+		}
+		selectedSession := fileNames[selectedIndex]
 
-sessionFile := filepath.Join(sessionsDir, selectedSession)
+		sessionFile := filepath.Join(sessionsDir, selectedSession)
 
-// Show action options
-for {
-action, err := utils.PromptSelect("Choose an action:", []string{
-"Copy file to current directory",
-"Delete session",
-"Copy content to clipboard",
-"Go back",
-})
-if err != nil {
-return err
-}
+		// Show action options
+		for {
+			action, err := utils.PromptSelect("Choose an action:", []string{
+				"Copy file to current directory",
+				"Delete session",
+				"Copy content to clipboard",
+				"Go back",
+			})
+			if err != nil {
+				return err
+			}
 
-switch action {
-case "Copy file to current directory":
-pwd, err := os.Getwd()
-if err != nil {
-return fmt.Errorf("failed to get working directory: %w", err)
-}
+			switch action {
+			case "Copy file to current directory":
+				pwd, err := os.Getwd()
+				if err != nil {
+					return fmt.Errorf("failed to get working directory: %w", err)
+				}
 
-destFile := filepath.Join(pwd, selectedSession)
-content, err := os.ReadFile(sessionFile)
-if err != nil {
-return fmt.Errorf("failed to read session file: %w", err)
-}
+				destFile := filepath.Join(pwd, selectedSession)
+				content, err := os.ReadFile(sessionFile)
+				if err != nil {
+					return fmt.Errorf("failed to read session file: %w", err)
+				}
 
-if err := os.WriteFile(destFile, content, 0o644); err != nil {
-return fmt.Errorf("failed to copy file: %w", err)
-}
+				if err := os.WriteFile(destFile, content, 0o644); err != nil {
+					return fmt.Errorf("failed to copy file: %w", err)
+				}
 
-fmt.Printf("✅ Session copied to: %s\n", destFile)
-return nil
+				fmt.Printf("✅ Session copied to: %s\n", destFile)
+				return nil
 
-case "Delete session":
-confirm, err := utils.SurveyConfirm(fmt.Sprintf("Are you sure you want to delete %s?", selectedSession), false)
-if err != nil {
-return err
-}
+			case "Delete session":
+				confirm, err := utils.SurveyConfirm(fmt.Sprintf("Are you sure you want to delete %s?", selectedSession), false)
+				if err != nil {
+					return err
+				}
 
-if confirm {
-if err := os.Remove(sessionFile); err != nil {
-return fmt.Errorf("failed to delete session: %w", err)
-}
-fmt.Println("✅ Session deleted")
-}
-return nil
+				if confirm {
+					if err := os.Remove(sessionFile); err != nil {
+						return fmt.Errorf("failed to delete session: %w", err)
+					}
+					fmt.Println("✅ Session deleted")
+				}
+				return nil
 
-case "Copy content to clipboard":
-content, err := os.ReadFile(sessionFile)
-if err != nil {
-return fmt.Errorf("failed to read session file: %w", err)
-}
+			case "Copy content to clipboard":
+				content, err := os.ReadFile(sessionFile)
+				if err != nil {
+					return fmt.Errorf("failed to read session file: %w", err)
+				}
 
-if err := utils.CopyToClipboard(string(content)); err != nil {
-return fmt.Errorf("failed to copy to clipboard: %w", err)
-}
+				if err := utils.CopyToClipboard(string(content)); err != nil {
+					return fmt.Errorf("failed to copy to clipboard: %w", err)
+				}
 
-fmt.Println("✅ Session content copied to clipboard")
-return nil
+				fmt.Println("✅ Session content copied to clipboard")
+				return nil
 
-case "Go back":
-return nil
-}
-}
-},
+			case "Go back":
+				return nil
+			}
+		}
+	},
 }
 
 // SessionClearCmd clears all sessions with PIN confirmation
 var SessionClearCmd = &cobra.Command{
-Use:   "session-clear",
-Short: "Clear all sessions with PIN confirmation",
-Long:  "Delete all sessions after 6-digit PIN confirmation",
-RunE: func(cmd *cobra.Command, args []string) error {
-configDir, err := utils.GetConfigDir()
-if err != nil {
-return err
-}
+	Use:   "session-clear",
+	Short: "Clear all sessions with PIN confirmation",
+	Long:  "Delete all sessions after 6-digit PIN confirmation",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		configDir, err := utils.GetConfigDir()
+		if err != nil {
+			return err
+		}
 
-sessionsDir := filepath.Join(configDir, "sessions")
+		sessionsDir := filepath.Join(configDir, "sessions")
 
-// Check if sessions exist
-files, err := os.ReadDir(sessionsDir)
-if err != nil || len(files) == 0 {
-fmt.Println("📁 No sessions to clear")
-return nil
-}
+		// Check if sessions exist
+		files, err := os.ReadDir(sessionsDir)
+		if err != nil || len(files) == 0 {
+			fmt.Println("📁 No sessions to clear")
+			return nil
+		}
 
-// Count session files
-count := 0
-for _, file := range files {
-if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-count++
-}
-}
+		// Count session files
+		count := 0
+		for _, file := range files {
+			if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
+				count++
+			}
+		}
 
-if count == 0 {
-fmt.Println("📁 No sessions to clear")
-return nil
-}
+		if count == 0 {
+			fmt.Println("📁 No sessions to clear")
+			return nil
+		}
 
-fmt.Printf("⚠️  This will delete %d session(s)\n", count)
+		fmt.Printf("⚠️  This will delete %d session(s)\n", count)
 
-// Generate PIN
-pin, err := utils.GeneratePIN()
-if err != nil {
-return fmt.Errorf("failed to generate PIN: %w", err)
-}
+		// Generate PIN
+		pin, err := utils.GeneratePIN()
+		if err != nil {
+			return fmt.Errorf("failed to generate PIN: %w", err)
+		}
 
-fmt.Printf("🔐 Enter PIN to confirm: %s\n", pin)
+		fmt.Printf("🔐 Enter PIN to confirm: %s\n", pin)
 
-// Get user input
-userPin, err := utils.SurveyInput("Enter PIN:", "")
-if err != nil {
-return err
-}
+		// Get user input
+		userPin, err := utils.SurveyInput("Enter PIN:", "")
+		if err != nil {
+			return err
+		}
 
-if userPin != pin {
-fmt.Println("❌ Invalid PIN. Operation cancelled")
-return nil
-}
+		if userPin != pin {
+			fmt.Println("❌ Invalid PIN. Operation cancelled")
+			return nil
+		}
 
-// Delete all sessions
-for _, file := range files {
-if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-sessionFile := filepath.Join(sessionsDir, file.Name())
-if err := os.Remove(sessionFile); err != nil {
-fmt.Printf("⚠️  Failed to delete %s: %v\n", file.Name(), err)
-}
-}
-}
+		// Delete all sessions
+		for _, file := range files {
+			if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
+				sessionFile := filepath.Join(sessionsDir, file.Name())
+				if err := os.Remove(sessionFile); err != nil {
+					fmt.Printf("⚠️  Failed to delete %s: %v\n", file.Name(), err)
+				}
+			}
+		}
 
-fmt.Printf("✅ Cleared %d session(s)\n", count)
-return nil
-},
+		fmt.Printf("✅ Cleared %d session(s)\n", count)
+		return nil
+	},
 }
 
 // SessionPruneCmd prunes old sessions
 var SessionPruneCmd = &cobra.Command{
-Use:   "session-prune [days]",
-Short: "Delete sessions older than specified days",
-Long:  "Delete sessions older than the specified number of days with PIN confirmation",
-Args:  cobra.ExactArgs(1),
-RunE: func(cmd *cobra.Command, args []string) error {
-configDir, err := utils.GetConfigDir()
-if err != nil {
-return err
-}
+	Use:   "session-prune [days]",
+	Short: "Delete sessions older than specified days",
+	Long:  "Delete sessions older than the specified number of days with PIN confirmation",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		configDir, err := utils.GetConfigDir()
+		if err != nil {
+			return err
+		}
 
-// Parse days argument
-days := 0
-if _, err := fmt.Sscanf(args[0], "%d", &days); err != nil {
-return fmt.Errorf("invalid days argument: %w", err)
-}
+		// Parse days argument
+		days := 0
+		if _, err := fmt.Sscanf(args[0], "%d", &days); err != nil {
+			return fmt.Errorf("invalid days argument: %w", err)
+		}
 
-if days < 1 {
-return fmt.Errorf("days must be at least 1")
-}
+		if days < 1 {
+			return fmt.Errorf("days must be at least 1")
+		}
 
-sessionsDir := filepath.Join(configDir, "sessions")
+		sessionsDir := filepath.Join(configDir, "sessions")
 
-// Check if sessions exist
-files, err := os.ReadDir(sessionsDir)
-if err != nil || len(files) == 0 {
-fmt.Println("📁 No sessions to prune")
-return nil
-}
+		// Check if sessions exist
+		files, err := os.ReadDir(sessionsDir)
+		if err != nil || len(files) == 0 {
+			fmt.Println("📁 No sessions to prune")
+			return nil
+		}
 
-// Find old sessions
-cutoffTime := time.Now().AddDate(0, 0, -days)
-var oldSessions []string
+		// Find old sessions
+		cutoffTime := time.Now().AddDate(0, 0, -days)
+		var oldSessions []string
 
-for _, file := range files {
-if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-info, err := file.Info()
-if err != nil {
-continue
-}
+		for _, file := range files {
+			if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
+				info, err := file.Info()
+				if err != nil {
+					continue
+				}
 
-if info.ModTime().Before(cutoffTime) {
-oldSessions = append(oldSessions, file.Name())
-}
-}
-}
+				if info.ModTime().Before(cutoffTime) {
+					oldSessions = append(oldSessions, file.Name())
+				}
+			}
+		}
 
-if len(oldSessions) == 0 {
-fmt.Printf("📁 No sessions older than %d days\n", days)
-return nil
-}
+		if len(oldSessions) == 0 {
+			fmt.Printf("📁 No sessions older than %d days\n", days)
+			return nil
+		}
 
-fmt.Printf("⚠️  Found %d session(s) older than %d days:\n", len(oldSessions), days)
-for _, name := range oldSessions {
-fmt.Printf("   - %s\n", name)
-}
-fmt.Println()
+		fmt.Printf("⚠️  Found %d session(s) older than %d days:\n", len(oldSessions), days)
+		for _, name := range oldSessions {
+			fmt.Printf("   - %s\n", name)
+		}
+		fmt.Println()
 
-// Generate PIN
-pin, err := utils.GeneratePIN()
-if err != nil {
-return fmt.Errorf("failed to generate PIN: %w", err)
-}
+		// Generate PIN
+		pin, err := utils.GeneratePIN()
+		if err != nil {
+			return fmt.Errorf("failed to generate PIN: %w", err)
+		}
 
-fmt.Printf("🔐 Enter PIN to confirm: %s\n", pin)
+		fmt.Printf("🔐 Enter PIN to confirm: %s\n", pin)
 
-// Get user input
-userPin, err := utils.SurveyInput("Enter PIN:", "")
-if err != nil {
-return err
-}
+		// Get user input
+		userPin, err := utils.SurveyInput("Enter PIN:", "")
+		if err != nil {
+			return err
+		}
 
-if userPin != pin {
-fmt.Println("❌ Invalid PIN. Operation cancelled")
-return nil
-}
+		if userPin != pin {
+			fmt.Println("❌ Invalid PIN. Operation cancelled")
+			return nil
+		}
 
-// Delete old sessions
-for _, name := range oldSessions {
-sessionFile := filepath.Join(sessionsDir, name)
-if err := os.Remove(sessionFile); err != nil {
-fmt.Printf("⚠️  Failed to delete %s: %v\n", name, err)
-}
-}
+		// Delete old sessions
+		for _, name := range oldSessions {
+			sessionFile := filepath.Join(sessionsDir, name)
+			if err := os.Remove(sessionFile); err != nil {
+				fmt.Printf("⚠️  Failed to delete %s: %v\n", name, err)
+			}
+		}
 
-fmt.Printf("✅ Pruned %d session(s)\n", len(oldSessions))
-return nil
-},
+		fmt.Printf("✅ Pruned %d session(s)\n", len(oldSessions))
+		return nil
+	},
 }
 
 // SecureSessionsCmd lists and manages secure sessions
 var SecureSessionsCmd = &cobra.Command{
-Use:   "secure-sessions",
-Short: "List and manage encrypted secure sessions",
-Long:  "List all secure sessions and perform actions with password authentication",
-RunE: func(cmd *cobra.Command, args []string) error {
-configDir, err := utils.GetConfigDir()
-if err != nil {
-return err
-}
+	Use:   "secure-sessions",
+	Short: "List and manage encrypted secure sessions",
+	Long:  "List all secure sessions and perform actions with password authentication",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		configDir, err := utils.GetConfigDir()
+		if err != nil {
+			return err
+		}
 
-sessionsDir := filepath.Join(configDir, "secure-sessions")
-if err := os.MkdirAll(sessionsDir, 0o700); err != nil {
-return fmt.Errorf("failed to create secure-sessions directory: %w", err)
-}
+		sessionsDir := filepath.Join(configDir, "secure-sessions")
+		if err := os.MkdirAll(sessionsDir, 0o700); err != nil {
+			return fmt.Errorf("failed to create secure-sessions directory: %w", err)
+		}
 
-// List session files
-files, err := os.ReadDir(sessionsDir)
-if err != nil {
-return fmt.Errorf("failed to read sessions directory: %w", err)
-}
+		// List session files
+		files, err := os.ReadDir(sessionsDir)
+		if err != nil {
+			return fmt.Errorf("failed to read sessions directory: %w", err)
+		}
 
-if len(files) == 0 {
-fmt.Println("📁 No secure sessions found")
-return nil
-}
+		if len(files) == 0 {
+			fmt.Println("📁 No secure sessions found")
+			return nil
+		}
 
-// Build options for selection
-var options []string
-var fileNames []string
-for _, file := range files {
-if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-fileNames = append(fileNames, file.Name())
-options = append(options, formatSessionOption(file.Name()))
-}
-}
+		// Build options for selection
+		var options []string
+		var fileNames []string
+		for _, file := range files {
+			if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
+				fileNames = append(fileNames, file.Name())
+				options = append(options, formatSessionOption(file.Name()))
+			}
+		}
 
-if len(options) == 0 {
-fmt.Println("📁 No secure sessions found")
-return nil
-}
+		if len(options) == 0 {
+			fmt.Println("📁 No secure sessions found")
+			return nil
+		}
 
-// Let user select a session
-selectedOption, err := utils.PromptSelect("Select a secure session:", options)
-if err != nil {
-return err
-}
+		// Let user select a session
+		selectedOption, err := utils.PromptSelect("Select a secure session:", options)
+		if err != nil {
+			return err
+		}
 
-// Find the corresponding filename
-selectedIndex := -1
-for i, opt := range options {
-if opt == selectedOption {
-selectedIndex = i
-break
-}
-}
-if selectedIndex == -1 {
-return fmt.Errorf("failed to find selected session")
-}
-selectedSession := fileNames[selectedIndex]
+		// Find the corresponding filename
+		selectedIndex := -1
+		for i, opt := range options {
+			if opt == selectedOption {
+				selectedIndex = i
+				break
+			}
+		}
+		if selectedIndex == -1 {
+			return fmt.Errorf("failed to find selected session")
+		}
+		selectedSession := fileNames[selectedIndex]
 
-sessionFile := filepath.Join(sessionsDir, selectedSession)
+		sessionFile := filepath.Join(sessionsDir, selectedSession)
 
-// Show password hint if available
-hintsFile := filepath.Join(sessionsDir, "password-hints.txt")
-if utils.FileExists(hintsFile) {
-hintsContent, err := os.ReadFile(hintsFile)
-if err == nil {
-lines := strings.Split(string(hintsContent), "\n")
-for _, line := range lines {
-if strings.HasPrefix(line, selectedSession+":") {
-hint := strings.TrimPrefix(line, selectedSession+":")
-hint = strings.TrimSpace(hint)
-if hint != "" {
-fmt.Printf("💡 Password hint: %s\n", hint)
-}
-break
-}
-}
-}
-}
+		// Show password hint if available
+		hintsFile := filepath.Join(sessionsDir, "password-hints.txt")
+		if utils.FileExists(hintsFile) {
+			hintsContent, err := os.ReadFile(hintsFile)
+			if err == nil {
+				lines := strings.Split(string(hintsContent), "\n")
+				for _, line := range lines {
+					if strings.HasPrefix(line, selectedSession+":") {
+						hint := strings.TrimPrefix(line, selectedSession+":")
+						hint = strings.TrimSpace(hint)
+						if hint != "" {
+							fmt.Printf("💡 Password hint: %s\n", hint)
+						}
+						break
+					}
+				}
+			}
+		}
 
-// Show action options
-action, err := utils.PromptSelect("Choose an action:", []string{
-"Copy file to current directory",
-"Copy content to clipboard",
-"Delete session",
-"Go back",
-})
-if err != nil {
-return err
-}
+		// Show action options
+		action, err := utils.PromptSelect("Choose an action:", []string{
+			"Copy file to current directory",
+			"Copy content to clipboard",
+			"Delete session",
+			"Go back",
+		})
+		if err != nil {
+			return err
+		}
 
-if action == "Go back" {
-return nil
-}
+		if action == "Go back" {
+			return nil
+		}
 
-if action == "Delete session" {
-confirm, err := utils.SurveyConfirm(fmt.Sprintf("Are you sure you want to delete %s?", selectedSession), false)
-if err != nil {
-return err
-}
+		if action == "Delete session" {
+			confirm, err := utils.SurveyConfirm(fmt.Sprintf("Are you sure you want to delete %s?", selectedSession), false)
+			if err != nil {
+				return err
+			}
 
-if confirm {
-if err := os.Remove(sessionFile); err != nil {
-return fmt.Errorf("failed to delete session: %w", err)
-}
-fmt.Println("✅ Secure session deleted")
-}
-return nil
-}
+			if confirm {
+				if err := os.Remove(sessionFile); err != nil {
+					return fmt.Errorf("failed to delete session: %w", err)
+				}
+				fmt.Println("✅ Secure session deleted")
+			}
+			return nil
+		}
 
-// For copy actions, we need the password
-password, err := utils.SurveyPassword("Enter session password:")
-if err != nil {
-return err
-}
+		// For copy actions, we need the password
+		password, err := utils.SurveyPassword("Enter session password:")
+		if err != nil {
+			return err
+		}
 
-// Try to decrypt
-decrypted, err := decryptSessionFile(sessionFile, password)
-if err != nil {
-return fmt.Errorf("failed to decrypt session: %w", err)
-}
+		// Try to decrypt
+		decrypted, err := decryptSessionFile(sessionFile, password)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt session: %w", err)
+		}
 
-// Verify decryption by checking if content looks like valid markdown
-if !strings.Contains(string(decrypted), "# ") && !strings.Contains(string(decrypted), "**Started:**") {
-return fmt.Errorf("❌ incorrect password or corrupted session file")
-}
+		// Verify decryption by checking if content looks like valid markdown
+		if !strings.Contains(string(decrypted), "# ") && !strings.Contains(string(decrypted), "**Started:**") {
+			return fmt.Errorf("❌ incorrect password or corrupted session file")
+		}
 
-switch action {
-case "Copy file to current directory":
-pwd, err := os.Getwd()
-if err != nil {
-return fmt.Errorf("failed to get working directory: %w", err)
-}
+		switch action {
+		case "Copy file to current directory":
+			pwd, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("failed to get working directory: %w", err)
+			}
 
-destFile := filepath.Join(pwd, selectedSession)
-if err := os.WriteFile(destFile, decrypted, 0o644); err != nil {
-return fmt.Errorf("failed to copy file: %w", err)
-}
+			destFile := filepath.Join(pwd, selectedSession)
+			if err := os.WriteFile(destFile, decrypted, 0o644); err != nil {
+				return fmt.Errorf("failed to copy file: %w", err)
+			}
 
-fmt.Printf("✅ Decrypted session copied to: %s\n", destFile)
+			fmt.Printf("✅ Decrypted session copied to: %s\n", destFile)
 
-case "Copy content to clipboard":
-if err := utils.CopyToClipboard(string(decrypted)); err != nil {
-return fmt.Errorf("failed to copy to clipboard: %w", err)
-}
+		case "Copy content to clipboard":
+			if err := utils.CopyToClipboard(string(decrypted)); err != nil {
+				return fmt.Errorf("failed to copy to clipboard: %w", err)
+			}
 
-fmt.Println("✅ Decrypted session content copied to clipboard")
-}
+			fmt.Println("✅ Decrypted session content copied to clipboard")
+		}
 
-return nil
-},
+		return nil
+	},
 }
