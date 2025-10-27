@@ -25,16 +25,47 @@ var SessionStartCmd = &cobra.Command{
 	},
 }
 
-// startSession is the core session logic, shared by regular and secure sessions
-func startSession(args []string, secure bool, password string, passwordHint string) error {
-	// Get summary
+// slugify converts a string to a URL-friendly slug
+func slugify(text string, maxLength int) string {
+	// Convert to lowercase
+	slug := strings.ToLower(text)
+	
+	// Replace spaces and special characters with hyphens
+	slug = strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			return r
+		}
+		return '-'
+	}, slug)
+	
+	// Remove consecutive hyphens
+	for strings.Contains(slug, "--") {
+		slug = strings.ReplaceAll(slug, "--", "-")
+	}
+	
+	// Trim hyphens from ends
+	slug = strings.Trim(slug, "-")
+	
+	// Truncate to max length
+	if len(slug) > maxLength {
+		slug = slug[:maxLength]
+	}
+	
+	// Trim trailing hyphen if truncation created one
+	slug = strings.TrimRight(slug, "-")
+	
+	return slug
+}
+
+// getSessionSummary gets the session summary from args or prompts the user
+func getSessionSummary(args []string) (string, error) {
 	var summary string
 	var err error
 
 	if len(args) == 0 {
 		summary, err = utils.SurveyInput("Enter session summary:", "")
 		if err != nil {
-			return err
+			return "", err
 		}
 	} else {
 		summary = strings.Join(args, " ")
@@ -44,12 +75,11 @@ func startSession(args []string, secure bool, password string, passwordHint stri
 		summary = "Development Session"
 	}
 
-	// Create session file
-	configDir, err := utils.GetConfigDir()
-	if err != nil {
-		return err
-	}
+	return summary, nil
+}
 
+// createSessionFile creates a new session file with the given summary
+func createSessionFile(summary, configDir string, secure bool) (string, string, error) {
 	// Create sessions subfolder
 	var sessionsDir string
 	if secure {
@@ -58,11 +88,18 @@ func startSession(args []string, secure bool, password string, passwordHint stri
 		sessionsDir = filepath.Join(configDir, "sessions")
 	}
 	if err := os.MkdirAll(sessionsDir, 0o700); err != nil {
-		return fmt.Errorf("failed to create sessions directory: %w", err)
+		return "", "", fmt.Errorf("failed to create sessions directory: %w", err)
 	}
 
 	timestamp := time.Now().Format("20060102-150405")
-	sessionFile := filepath.Join(configDir, fmt.Sprintf("session-%s.md", timestamp))
+	slugSummary := slugify(summary, 32)
+	var filename string
+	if slugSummary != "" {
+		filename = fmt.Sprintf("session-%s-%s.md", timestamp, slugSummary)
+	} else {
+		filename = fmt.Sprintf("session-%s.md", timestamp)
+	}
+	sessionFile := filepath.Join(configDir, filename)
 
 	// Initialize session file
 	startTime := time.Now()
@@ -70,7 +107,239 @@ func startSession(args []string, secure bool, password string, passwordHint stri
 		summary, startTime.Format("2006-01-02 15:04:05"))
 
 	if err := os.WriteFile(sessionFile, []byte(header), 0o644); err != nil {
-		return fmt.Errorf("failed to create session file: %w", err)
+		return "", "", fmt.Errorf("failed to create session file: %w", err)
+	}
+
+	return sessionFile, sessionsDir, nil
+}
+
+// handleAICommand handles the AI command in a session
+func handleAICommand(question, sessionFile string) error {
+	fmt.Println("\n🤖 Asking AI...")
+
+	// Get API key
+	apiKey, err := utils.GetAPIKey()
+	if err != nil {
+		fmt.Printf("❌ %v\n", err)
+		fmt.Println("Please run 'mayrlabs ai-setup' first")
+		return nil // Don't return error, just continue session
+	}
+
+	// Query Gemini
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	if err != nil {
+		fmt.Printf("❌ Failed to create client: %v\n", err)
+		return nil
+	}
+
+	model := client.GenerativeModel("gemini-2.0-flash-exp")
+	resp, _ := model.GenerateContent(ctx, genai.Text(question))
+	_ = client.Close()
+
+	// Get response text
+	var answer string
+	if resp != nil && len(resp.Candidates) > 0 {
+		for _, part := range resp.Candidates[0].Content.Parts {
+			answer += fmt.Sprintf("%v", part)
+		}
+	}
+
+	// Display response
+	fmt.Println("\n📝 Response:")
+	fmt.Println(answer)
+	fmt.Println()
+
+	// Record in session file
+	entry := fmt.Sprintf("## AI\n\n**Question:** %s\n\n**Answer:** %s\n\n---\n\n",
+		question, answer)
+
+	file, err := os.OpenFile(sessionFile, os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		fmt.Printf("❌ Failed to record interaction: %v\n", err)
+		return nil
+	}
+	_, _ = file.WriteString(entry)
+	_ = file.Close()
+
+	return nil
+}
+
+// handleTaskCommand handles the Task command in a session
+func handleTaskCommand(task string, tasks *[]string) {
+	*tasks = append(*tasks, task)
+	fmt.Println("✅ Task recorded")
+}
+
+// handleNoteCommand handles note recording in a session
+func handleNoteCommand(note, sessionFile string) error {
+	timestamp := time.Now().Format("15:04:05")
+	entry := fmt.Sprintf("## Note [%s]\n\n%s\n\n---\n\n", timestamp, note)
+
+	file, err := os.OpenFile(sessionFile, os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		fmt.Printf("❌ Failed to record note: %v\n", err)
+		return nil
+	}
+	_, _ = file.WriteString(entry)
+	_ = file.Close()
+
+	fmt.Println("✅ Note recorded")
+	return nil
+}
+
+// endSession finalizes and saves the session
+func endSession(sessionFile, sessionsDir string, tasks []string, startTime time.Time, secure bool, password, passwordHint string, summary string) error {
+	endTime := time.Now()
+	duration := endTime.Sub(startTime)
+
+	// Add tasks section if there are any tasks
+	var tasksContent string
+	if len(tasks) > 0 {
+		tasksContent = "\n## Tasks\n\n"
+		for _, task := range tasks {
+			tasksContent += fmt.Sprintf("- [ ] %s\n", task)
+		}
+		tasksContent += "\n"
+	}
+
+	// Add end time to file
+	endContent := fmt.Sprintf("%s\n---\n\n**Ended:** %s\n**Duration:** %s\n\n",
+		tasksContent, endTime.Format("2006-01-02 15:04:05"), formatDuration(duration))
+
+	// Add a nice closing message
+	endContent += getSessionEndMessage(duration)
+
+	file, err := os.OpenFile(sessionFile, os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		return fmt.Errorf("failed to open session file: %w", err)
+	}
+	if _, err := file.WriteString(endContent); err != nil {
+		_ = file.Close()
+		return fmt.Errorf("failed to write to session file: %w", err)
+	}
+	if err = file.Close(); err != nil {
+		return err
+	}
+
+	// Handle encryption for secure sessions
+	if secure {
+		if err := encryptSessionFile(sessionFile, password); err != nil {
+			return fmt.Errorf("failed to encrypt session: %w", err)
+		}
+
+		// Update password hints file
+		hintsFile := filepath.Join(sessionsDir, "password-hints.txt")
+		hintEntry := fmt.Sprintf("%s: %s\n", filepath.Base(sessionFile), passwordHint)
+		hintData, _ := os.ReadFile(hintsFile)
+		hintData = append(hintData, []byte(hintEntry)...)
+		if err := os.WriteFile(hintsFile, hintData, 0o600); err != nil {
+			return fmt.Errorf("failed to save password hint: %w", err)
+		}
+	}
+
+	// Copy to sessions folder
+	content, err := os.ReadFile(sessionFile)
+	if err != nil {
+		return fmt.Errorf("failed to read session file: %w", err)
+	}
+
+	sessionDestFile := filepath.Join(sessionsDir, filepath.Base(sessionFile))
+	if err := os.WriteFile(sessionDestFile, content, 0o644); err != nil {
+		return fmt.Errorf("failed to copy session file to sessions folder: %w", err)
+	}
+
+	fmt.Printf("\n✅ Session ended and saved to: %s\n", sessionDestFile)
+
+	// Ask user if they want to copy to current directory
+	copyToPwd, err := utils.SurveyConfirm("Copy session to current directory?", true)
+	if err != nil {
+		return err
+	}
+
+	if copyToPwd {
+		pwd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("failed to get working directory: %w", err)
+		}
+
+		destFile := filepath.Join(pwd, filepath.Base(sessionFile))
+		if err := os.WriteFile(destFile, content, 0o644); err != nil {
+			return fmt.Errorf("failed to copy session file to pwd: %w", err)
+		}
+		fmt.Printf("   - Copied to: %s\n", destFile)
+	}
+
+	// Remove temporary session file from config dir
+	_ = os.Remove(sessionFile)
+
+	return nil
+}
+
+// runSessionLoop runs the main interactive session loop
+func runSessionLoop(sessionFile string, startTime time.Time, tasks *[]string) (bool, error) {
+	var input string
+	prompt := &survey.Input{
+		Message: "Session >",
+	}
+	if err := survey.AskOne(prompt, &input); err != nil {
+		// User cancelled
+		fmt.Println("\n❌ Session cancelled")
+		return false, nil
+	}
+
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return true, nil // Continue loop
+	}
+
+	// Parse command
+	parts := strings.SplitN(input, " ", 2)
+	command := strings.ToUpper(parts[0])
+
+	// Check for END aliases
+	if command == "END" || command == "QUIT" || command == "CLOSE" {
+		return false, nil // End session
+	}
+
+	switch command {
+	case "AI":
+		if len(parts) < 2 {
+			fmt.Println("❌ Please provide a question for the AI")
+		} else {
+			_ = handleAICommand(parts[1], sessionFile)
+		}
+	case "TASK":
+		if len(parts) < 2 {
+			fmt.Println("❌ Please provide a task")
+		} else {
+			handleTaskCommand(parts[1], tasks)
+		}
+	default:
+		// Treat everything else as a note
+		_ = handleNoteCommand(input, sessionFile)
+	}
+
+	return true, nil // Continue loop
+}
+
+// startSession is the core session logic, shared by regular and secure sessions
+func startSession(args []string, secure bool, password string, passwordHint string) error {
+	// Get summary
+	summary, err := getSessionSummary(args)
+	if err != nil {
+		return err
+	}
+
+	// Create session file
+	configDir, err := utils.GetConfigDir()
+	if err != nil {
+		return err
+	}
+
+	sessionFile, sessionsDir, err := createSessionFile(summary, configDir, secure)
+	if err != nil {
+		return err
 	}
 
 	sessionType := "Session"
@@ -88,207 +357,21 @@ func startSession(args []string, secure bool, password string, passwordHint stri
 
 	// Track tasks during session
 	var tasks []string
+	startTime := time.Now()
 
 	// Interactive loop
 	for {
-		var input string
-		prompt := &survey.Input{
-			Message: "Session >",
+		continueLoop, err := runSessionLoop(sessionFile, startTime, &tasks)
+		if err != nil {
+			return err
 		}
-		if err := survey.AskOne(prompt, &input); err != nil {
-			// User cancelled
-			fmt.Println("\n❌ Session cancelled")
-			return nil
-		}
-
-		input = strings.TrimSpace(input)
-		if input == "" {
-			continue
-		}
-
-		// Parse command
-		parts := strings.SplitN(input, " ", 2)
-		command := strings.ToUpper(parts[0])
-
-		// Check for END aliases
-		if command == "END" || command == "QUIT" || command == "CLOSE" {
-			// End session
-			endTime := time.Now()
-			duration := endTime.Sub(startTime)
-
-			// Add tasks section if there are any tasks
-			var tasksContent string
-			if len(tasks) > 0 {
-				tasksContent = "\n## Tasks\n\n"
-				for _, task := range tasks {
-					tasksContent += fmt.Sprintf("- [ ] %s\n", task)
-				}
-				tasksContent += "\n"
-			}
-
-			// Add end time to file
-			endContent := fmt.Sprintf("%s\n---\n\n**Ended:** %s\n**Duration:** %s\n\n",
-				tasksContent, endTime.Format("2006-01-02 15:04:05"), formatDuration(duration))
-
-			// Add a nice closing message
-			endContent += getSessionEndMessage(duration)
-
-			file, err := os.OpenFile(sessionFile, os.O_APPEND|os.O_WRONLY, 0o644)
-			if err != nil {
-				return fmt.Errorf("failed to open session file: %w", err)
-			}
-			if _, err := file.WriteString(endContent); err != nil {
-				_ = file.Close()
-				return fmt.Errorf("failed to write to session file: %w", err)
-			}
-			if err = file.Close(); err != nil {
-				return err
-			}
-
-			// Handle encryption for secure sessions
-			if secure {
-				if err := encryptSessionFile(sessionFile, password); err != nil {
-					return fmt.Errorf("failed to encrypt session: %w", err)
-				}
-
-				// Update password hints file
-				hintsFile := filepath.Join(sessionsDir, "password-hints.txt")
-				hintEntry := fmt.Sprintf("%s: %s\n", filepath.Base(sessionFile), passwordHint)
-				hintData, _ := os.ReadFile(hintsFile)
-				hintData = append(hintData, []byte(hintEntry)...)
-				if err := os.WriteFile(hintsFile, hintData, 0o600); err != nil {
-					return fmt.Errorf("failed to save password hint: %w", err)
-				}
-			}
-
-			// Copy session file to pwd
-			pwd, err := os.Getwd()
-			if err != nil {
-				return fmt.Errorf("failed to get working directory: %w", err)
-			}
-
-			destFile := filepath.Join(pwd, filepath.Base(sessionFile))
-			content, err := os.ReadFile(sessionFile)
-			if err != nil {
-				return fmt.Errorf("failed to read session file: %w", err)
-			}
-			if err := os.WriteFile(destFile, content, 0o644); err != nil {
-				return fmt.Errorf("failed to copy session file to pwd: %w", err)
-			}
-
-			// Copy to sessions folder
-			sessionDestFile := filepath.Join(sessionsDir, filepath.Base(sessionFile))
-			if err := os.WriteFile(sessionDestFile, content, 0o644); err != nil {
-				return fmt.Errorf("failed to copy session file to sessions folder: %w", err)
-			}
-
-			// Remove temporary session file from config dir
-			_ = os.Remove(sessionFile)
-
-			fmt.Printf("\n✅ Session ended and saved to:\n")
-			fmt.Printf("   - Current directory: %s\n", destFile)
-			fmt.Printf("   - Sessions folder: %s\n", sessionDestFile)
-			return nil
-		}
-
-		switch command {
-		case "AI":
-			if len(parts) < 2 {
-				fmt.Println("❌ Please provide a question for the AI")
-				continue
-			}
-
-			question := parts[1]
-			fmt.Println("\n🤖 Asking AI...")
-
-			// Get API key
-			apiKey, err := utils.GetAPIKey()
-			if err != nil {
-				fmt.Printf("❌ %v\n", err)
-				fmt.Println("Please run 'mayrlabs ai-setup' first")
-				continue
-			}
-
-			// Query Gemini
-			ctx := context.Background()
-			client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
-			if err != nil {
-				fmt.Printf("❌ Failed to create client: %v\n", err)
-				continue
-			}
-
-			model := client.GenerativeModel("gemini-2.0-flash-exp")
-			resp, _ := model.GenerateContent(ctx, genai.Text(question))
-			err = client.Close()
-			if err != nil {
-				return err
-			}
-
-			if err != nil {
-				fmt.Printf("❌ Failed to generate content: %v\n", err)
-				continue
-			}
-
-			// Get response text
-			var answer string
-			if resp != nil && len(resp.Candidates) > 0 {
-				for _, part := range resp.Candidates[0].Content.Parts {
-					answer += fmt.Sprintf("%v", part)
-				}
-			}
-
-			// Display response
-			fmt.Println("\n📝 Response:")
-			fmt.Println(answer)
-			fmt.Println()
-
-			// Record in session file
-			entry := fmt.Sprintf("## AI\n\n**Question:** %s\n\n**Answer:** %s\n\n---\n\n",
-				question, answer)
-
-			file, err := os.OpenFile(sessionFile, os.O_APPEND|os.O_WRONLY, 0o644)
-			if err != nil {
-				fmt.Printf("❌ Failed to record interaction: %v\n", err)
-				continue
-			}
-			_, err = file.WriteString(entry)
-			if err != nil {
-				_ = file.Close()
-				continue
-			}
-			_ = file.Close()
-
-		case "TASK":
-			if len(parts) < 2 {
-				fmt.Println("❌ Please provide a task")
-				continue
-			}
-
-			task := parts[1]
-			tasks = append(tasks, task)
-			fmt.Println("✅ Task recorded")
-
-		default:
-			// Treat everything else as a note
-			note := input
-			timestamp := time.Now().Format("15:04:05")
-			entry := fmt.Sprintf("## Note [%s]\n\n%s\n\n---\n\n", timestamp, note)
-
-			file, err := os.OpenFile(sessionFile, os.O_APPEND|os.O_WRONLY, 0o644)
-			if err != nil {
-				fmt.Printf("❌ Failed to record note: %v\n", err)
-				continue
-			}
-			_, err = file.WriteString(entry)
-			if err != nil {
-				_ = file.Close()
-				continue
-			}
-			_ = file.Close()
-
-			fmt.Println("✅ Note recorded")
+		if !continueLoop {
+			break
 		}
 	}
+
+	// End the session
+	return endSession(sessionFile, sessionsDir, tasks, startTime, secure, password, passwordHint, summary)
 }
 
 // formatDuration formats a duration in a human-readable way
@@ -333,6 +416,41 @@ func getSessionEndMessage(duration time.Duration) string {
 		return fmt.Sprintf(message, formatDuration(duration))
 	}
 	return message
+}
+
+// extractSummaryFromFilename extracts the summary from a session filename
+// Format: session-{timestamp}-{slugSummary}.md or session-{timestamp}.md
+func extractSummaryFromFilename(filename string) string {
+	// Remove .md extension
+	name := strings.TrimSuffix(filename, ".md")
+	
+	// Split by hyphens
+	parts := strings.Split(name, "-")
+	
+	// session-YYYYMMDD-HHMMSS-summary format (at least 4 parts)
+	if len(parts) >= 4 {
+		// Join everything after the timestamp as the summary
+		summarySlug := strings.Join(parts[3:], "-")
+		// Convert back from slug to readable text
+		summary := strings.ReplaceAll(summarySlug, "-", " ")
+		// Capitalize first letter
+		if len(summary) > 0 {
+			summary = strings.ToUpper(summary[:1]) + summary[1:]
+		}
+		return summary
+	}
+	
+	// Old format or no summary
+	return ""
+}
+
+// formatSessionOption formats a session filename for display in the selection list
+func formatSessionOption(filename string) string {
+	summary := extractSummaryFromFilename(filename)
+	if summary != "" {
+		return fmt.Sprintf("%s - %s", filename, summary)
+	}
+	return filename
 }
 
 // encryptSessionFile encrypts a session file with the given password
@@ -442,9 +560,11 @@ return nil
 
 // Build options for selection
 var options []string
+var fileNames []string
 for _, file := range files {
 if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-options = append(options, file.Name())
+fileNames = append(fileNames, file.Name())
+options = append(options, formatSessionOption(file.Name()))
 }
 }
 
@@ -454,10 +574,23 @@ return nil
 }
 
 // Let user select a session
-selectedSession, err := utils.PromptSelect("Select a session:", options)
+selectedOption, err := utils.PromptSelect("Select a session:", options)
 if err != nil {
 return err
 }
+
+// Find the corresponding filename
+selectedIndex := -1
+for i, opt := range options {
+if opt == selectedOption {
+selectedIndex = i
+break
+}
+}
+if selectedIndex == -1 {
+return fmt.Errorf("failed to find selected session")
+}
+selectedSession := fileNames[selectedIndex]
 
 sessionFile := filepath.Join(sessionsDir, selectedSession)
 
@@ -716,9 +849,11 @@ return nil
 
 // Build options for selection
 var options []string
+var fileNames []string
 for _, file := range files {
 if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-options = append(options, file.Name())
+fileNames = append(fileNames, file.Name())
+options = append(options, formatSessionOption(file.Name()))
 }
 }
 
@@ -728,10 +863,23 @@ return nil
 }
 
 // Let user select a session
-selectedSession, err := utils.PromptSelect("Select a secure session:", options)
+selectedOption, err := utils.PromptSelect("Select a secure session:", options)
 if err != nil {
 return err
 }
+
+// Find the corresponding filename
+selectedIndex := -1
+for i, opt := range options {
+if opt == selectedOption {
+selectedIndex = i
+break
+}
+}
+if selectedIndex == -1 {
+return fmt.Errorf("failed to find selected session")
+}
+selectedSession := fileNames[selectedIndex]
 
 sessionFile := filepath.Join(sessionsDir, selectedSession)
 

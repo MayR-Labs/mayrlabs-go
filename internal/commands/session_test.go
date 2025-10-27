@@ -155,3 +155,118 @@ func TestEncryptDecryptEmptyPassword(t *testing.T) {
 		t.Error("decryptSessionFile() with empty password should return error")
 	}
 }
+
+func TestSlugify(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		maxLength int
+		want      string
+	}{
+		{
+			name:      "Simple text",
+			input:     "Hello World",
+			maxLength: 50,
+			want:      "hello-world",
+		},
+		{
+			name:      "With special characters",
+			input:     "Bug Fix: Authentication!",
+			maxLength: 50,
+			want:      "bug-fix-authentication",
+		},
+		{
+			name:      "Long text truncation",
+			input:     "This is a very long summary that needs to be truncated",
+			maxLength: 20,
+			want:      "this-is-a-very-long",
+		},
+		{
+			name:      "Multiple spaces",
+			input:     "Multiple   Spaces   Here",
+			maxLength: 50,
+			want:      "multiple-spaces-here",
+		},
+		{
+			name:      "Numbers and letters",
+			input:     "Feature 123 User Dashboard",
+			maxLength: 50,
+			want:      "feature-123-user-dashboard",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := slugify(tt.input, tt.maxLength)
+			if got != tt.want {
+				t.Errorf("slugify() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExtractSummaryFromFilename(t *testing.T) {
+	tests := []struct {
+		name     string
+		filename string
+		want     string
+	}{
+		{
+			name:     "New format with summary",
+			filename: "session-20240126-100000-bug-fix-authentication.md",
+			want:     "Bug fix authentication",
+		},
+		{
+			name:     "New format with long summary",
+			filename: "session-20240126-100000-feature-user-dashboard-redesign.md",
+			want:     "Feature user dashboard redesign",
+		},
+		{
+			name:     "Old format without summary",
+			filename: "session-20240126-100000.md",
+			want:     "",
+		},
+		{
+			name:     "Single word summary",
+			filename: "session-20240126-100000-refactor.md",
+			want:     "Refactor",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := extractSummaryFromFilename(tt.filename)
+			if got != tt.want {
+				t.Errorf("extractSummaryFromFilename() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormatSessionOption(t *testing.T) {
+	tests := []struct {
+		name     string
+		filename string
+		want     string
+	}{
+		{
+			name:     "With summary",
+			filename: "session-20240126-100000-bug-fix.md",
+			want:     "session-20240126-100000-bug-fix.md - Bug fix",
+		},
+		{
+			name:     "Without summary",
+			filename: "session-20240126-100000.md",
+			want:     "session-20240126-100000.md",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := formatSessionOption(tt.filename)
+			if got != tt.want {
+				t.Errorf("formatSessionOption() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
