@@ -542,7 +542,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **GitHub:** [https://github.com/MayR-Labs/mayrlabs-go](https://github.com/MayR-Labs/mayrlabs-go)
 - **Issues:** [Report a Bug](https://github.com/MayR-Labs/mayrlabs-go/issues)
-- **Documentation:** [Examples](examples/README.md) | [Development Guide](DEVELOPMENT.md)
+- **Documentation:**
+  - [Examples](examples/README.md) - Usage examples and workflows
+  - [API Reference](API.md) - Complete command reference
+  - [Architecture](ARCHITECTURE.md) - Technical architecture and design
+  - [Development Guide](DEVELOPMENT.md) - Contributing and development setup
 
 ---
 
