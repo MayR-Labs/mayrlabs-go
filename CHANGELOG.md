@@ -5,6 +5,69 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.0] - 2025-10-27
+
+### 🎉 First Stable Release
+
+This marks the first stable release of MayR Labs CLI! The tool is now production-ready with comprehensive features for development workflow automation.
+
+### Added
+
+- **AI Integration (v0.5.0):**
+  - `mayrlabs ai-setup` - Configure Gemini API key for AI features
+  - `mayrlabs ai [query...]` - Query the AI using Gemini with multiline support
+  - `mayrlabs ai-file [path]` - Send file content to AI for review/analysis
+  - `mayrlabs ai-alias [name]` - Create permanent aliases for AI command
+  - `mayrlabs ai-clear` - Clear stored Gemini API key
+
+- **Session Management (v0.5.0):**
+  - `mayrlabs session-start [summary]` - Start interactive development sessions
+  - `mayrlabs sessions` - List and manage all sessions
+  - `mayrlabs session-clear` - Clear all sessions with PIN confirmation
+  - `mayrlabs session-prune [days]` - Delete sessions older than specified days
+  - `mayrlabs secure-session-start [summary]` - Start encrypted sessions
+  - `mayrlabs secure-sessions` - List and manage encrypted secure sessions
+
+- **Alias Management Enhancement (v0.5.0):**
+  - `mayrlabs alias-list` - List all mayrlabs aliases
+  - `mayrlabs alias-clear` - Clear all aliases with confirmation
+
+### Changed
+
+- Updated documentation to reflect all current features
+- Improved README.md with comprehensive command reference
+- Enhanced examples/README.md with AI and session workflows
+- Version bumped to 1.0.0 for stable release
+
+### Documentation
+
+- **README.md**: Comprehensive update with all commands organized by category
+- **examples/README.md**: Added AI and session management examples
+- **New sections**: AI Commands, Session Management, Alias Management
+- Removed duplicate content and cleaned up formatting
+
+----
+## [v0.5.0] - 2025-10-26
+
+### Added
+
+- **AI Features:**
+  - Integrated Google Gemini AI for intelligent assistance
+  - AI-powered code review and analysis
+  - File content analysis with AI
+  - Persistent API key storage
+
+- **Session Management:**
+  - Interactive development sessions with AI integration
+  - Session recording and playback
+  - Encrypted secure sessions for sensitive work
+  - Session pruning and management
+
+- **Enhanced Alias Management:**
+  - List all created aliases
+  - Clear aliases with confirmation
+
+----
 ## [v0.4.0] - 2025-10-26
 
 ### Added
@@ -111,6 +174,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cross-platform support (macOS, Linux, Windows)
 - Built with Go and Cobra framework
 
+[v1.0.0]: https://github.com/MayR-Labs/mayrlabs-go/releases/tag/v1.0.0
+[v0.5.0]: https://github.com/MayR-Labs/mayrlabs-go/releases/tag/v0.5.0
 [v0.4.0]: https://github.com/MayR-Labs/mayrlabs-go/releases/tag/v0.4.0
 [v0.2.0]: https://github.com/MayR-Labs/mayrlabs-go/releases/tag/v0.2.0
 [v0.1.0]: https://github.com/MayR-Labs/mayrlabs-go/releases/tag/v0.1.0

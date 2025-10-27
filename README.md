@@ -182,6 +182,10 @@ mayrlabs uuid --copy
 mayrlabs password 32
 # Output: Xy9$mK2#pL8vN@qR5wT7uZ1aB3cD6eF0
 
+# Generate a random integer
+mayrlabs random-int
+# Will prompt for min and max values
+
 # Hash a string
 mayrlabs hash "my-secret" --algorithm sha256
 # Output: my-secret (sha256): 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
@@ -189,6 +193,48 @@ mayrlabs hash "my-secret" --algorithm sha256
 # Roll 3 dice
 mayrlabs roll-dice 3
 # Output: Results: [4 1 3], Total: 8, Average: 2.67
+```
+
+### AI Features
+
+```bash
+# Setup AI with your Gemini API key
+mayrlabs ai-setup
+
+# Ask a question to the AI
+mayrlabs ai "How do I implement binary search in Go?"
+
+# Send a file's content to the AI for review
+mayrlabs ai-file mycode.go
+
+# Create an alias for ai command
+mayrlabs ai-alias ask
+# Now you can use: ask "your question"
+
+# Clear the stored API key
+mayrlabs ai-clear
+```
+
+### Session Management
+
+```bash
+# Start a development session
+mayrlabs session-start "Implementing user authentication"
+
+# List all sessions
+mayrlabs sessions
+
+# Start a secure encrypted session
+mayrlabs secure-session-start "Sensitive feature work"
+
+# List secure sessions
+mayrlabs secure-sessions
+
+# Prune old sessions (older than 30 days)
+mayrlabs session-prune 30
+
+# Clear all sessions (requires PIN)
+mayrlabs session-clear
 ```
 
 ### Encoding/Decoding
@@ -214,6 +260,12 @@ mayrlabs base64-decode-to-file "SGVsbG8gV29ybGQ=" output.txt
 ```bash
 # Create an alias for mayrlabs
 mayrlabs alias ml
+
+# List all aliases
+mayrlabs alias-list
+
+# Clear all aliases (with confirmation)
+mayrlabs alias-clear
 
 # Upgrade to latest version
 mayrlabs upgrade
@@ -263,6 +315,7 @@ mayrlabs git prune-stale
 | `mayrlabs uuid`                     | Generate UUID v4 with optional --copy flag to copy to clipboard       |
 | `mayrlabs ulid`                     | Generate ULID with optional --copy flag to copy to clipboard          |
 | `mayrlabs password [length]`        | Generate a random password of specified length (default: 16)           |
+| `mayrlabs random-int`               | Generate a random integer (interactive mode if no args)                |
 | `mayrlabs hash [string]`            | Generate hash of a string using md5, sha1, or sha256                   |
 | `mayrlabs hash-file [file]`         | Generate hash of a file (interactive mode if no args)                  |
 | `mayrlabs create-keystore`          | Create a new keystore interactively (uses PKCS12 format)               |
@@ -283,7 +336,6 @@ mayrlabs git prune-stale
 
 | Command                     | Description                                                       |
 | --------------------------- | ----------------------------------------------------------------- |
-| `mayrlabs alias [name]`     | Create a permanent shell alias for mayrlabs command               |
 | `mayrlabs upgrade`          | Upgrade mayrlabs to the latest version                            |
 
 ---
@@ -354,6 +406,41 @@ mayrlabs git prune-stale
 | `mayrlabs js`                | List JavaScript commands                                |
 | `mayrlabs js setup-prettier` | Install and configure Prettier with `.prettierrc.yaml`  |
 | `mayrlabs js pretty`         | Run Prettier on the project                             |
+
+---
+
+### 🤖 AI Commands
+
+| Command                               | Description                                                           |
+| ------------------------------------- | --------------------------------------------------------------------- |
+| `mayrlabs ai-setup`                   | Setup Gemini API key for AI features                                  |
+| `mayrlabs ai [query...]`              | Query the AI using Gemini (supports multiline input)                  |
+| `mayrlabs ai-file [path]`             | Send the content of a text-based file to the AI                       |
+| `mayrlabs ai-alias [name]`            | Create a permanent alias for 'mayrlabs ai' command                    |
+| `mayrlabs ai-clear`                   | Clear the stored Gemini API key                                       |
+
+---
+
+### 📝 Session Management Commands
+
+| Command                                  | Description                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| `mayrlabs session-start [summary]`       | Start an interactive development session                           |
+| `mayrlabs sessions`                      | List and manage sessions                                           |
+| `mayrlabs session-clear`                 | Clear all sessions with PIN confirmation                           |
+| `mayrlabs session-prune [days]`          | Delete sessions older than specified days                          |
+| `mayrlabs secure-session-start [summary]`| Start an encrypted interactive development session                 |
+| `mayrlabs secure-sessions`               | List and manage encrypted secure sessions                          |
+
+---
+
+### 🏷️ Alias Management Commands
+
+| Command                     | Description                                               |
+| --------------------------- | --------------------------------------------------------- |
+| `mayrlabs alias [name]`     | Create a permanent shell alias for mayrlabs command       |
+| `mayrlabs alias-list`       | List all mayrlabs aliases                                 |
+| `mayrlabs alias-clear`      | Clear all mayrlabs aliases with confirmation              |
 
 ---
 
@@ -468,24 +555,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ by MayR Labs**
-
-# Format Go code
-mayrlabs format go
-
-# Add MIT license for MayR Labs, 2025
-mayrlabs add-license --type mit --author "MayR Labs" --year 2025
-
-# Generate default scripts for a Flutter project
-mayrlabs flutter create-scripts
-```
-
----
-
-## 🏗️ Tech Stack
-
-- **Language:** Go
-- **Framework:** Cobra
-- **Build:** Single static binary
-- **Platforms:** macOS, Linux, Windows
-
----
