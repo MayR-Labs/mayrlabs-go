@@ -180,6 +180,121 @@ mayrlabs js pretty
 mayrlabs quote
 ```
 
+#### Generate Random Integer
+```bash
+mayrlabs random-int
+# Will prompt for min and max values
+```
+
+---
+
+## AI Features
+
+### Setup AI
+```bash
+# Setup your Gemini API key
+mayrlabs ai-setup
+```
+
+### Query AI
+```bash
+# Ask a question
+mayrlabs ai "How do I implement a binary search tree in Go?"
+
+# Multi-line input (if no query provided)
+mayrlabs ai
+```
+
+### Send File to AI
+```bash
+# Get AI review/analysis of a file
+mayrlabs ai-file src/main.go
+
+# Get help understanding code
+mayrlabs ai-file complex-algorithm.py
+```
+
+### Create AI Alias
+```bash
+# Create a short alias for ai command
+mayrlabs ai-alias ask
+
+# Now you can use:
+ask "your question here"
+```
+
+### Clear API Key
+```bash
+# Remove stored Gemini API key
+mayrlabs ai-clear
+```
+
+---
+
+## Session Management
+
+### Start Regular Session
+```bash
+# Start a session with a summary
+mayrlabs session-start "Implementing user authentication"
+
+# Start without summary (will prompt)
+mayrlabs session-start
+```
+
+### Start Secure Session
+```bash
+# Start an encrypted session for sensitive work
+mayrlabs secure-session-start "Security patch development"
+
+# Will prompt for encryption password
+```
+
+### List Sessions
+```bash
+# List all regular sessions
+mayrlabs sessions
+
+# List all secure sessions
+mayrlabs secure-sessions
+```
+
+### Manage Sessions
+```bash
+# Prune sessions older than 30 days
+mayrlabs session-prune 30
+
+# Clear all sessions (requires PIN)
+mayrlabs session-clear
+```
+
+---
+
+## Alias Management
+
+### Create Alias
+```bash
+# Create an alias for mayrlabs
+mayrlabs alias ml
+
+# Now you can use 'ml' instead of 'mayrlabs'
+ml version
+```
+
+### List Aliases
+```bash
+# Show all created aliases
+mayrlabs alias-list
+```
+
+### Clear Aliases
+```bash
+# Remove all aliases (with confirmation)
+mayrlabs alias-clear
+```
+
+---
+
 ### DNS Management
 
 #### Clear DNS Cache
@@ -271,6 +386,43 @@ mayrlabs editor-config dart
 
 # Create LICENSE
 mayrlabs add-license --type mit --author "Your Name" --year 2025
+```
+
+### AI-Assisted Development Workflow
+
+```bash
+# Setup AI once
+mayrlabs ai-setup
+
+# Start a development session
+mayrlabs session-start "Building REST API"
+
+# Get help from AI during development
+mayrlabs ai "How do I handle concurrent requests in Go?"
+
+# Review code with AI
+mayrlabs ai-file src/api/handler.go
+
+# Create a short alias for faster queries
+mayrlabs ai-alias ask
+
+# Use the alias
+ask "Best practices for error handling in Go?"
+```
+
+### Secure Development Workflow
+
+```bash
+# Start an encrypted session for sensitive work
+mayrlabs secure-session-start "Security vulnerability fix"
+
+# Work on sensitive code...
+
+# List your secure sessions later
+mayrlabs secure-sessions
+
+# Clean up old sessions
+mayrlabs session-prune 30
 ```
 
 ## Integration with Other Tools
