@@ -24,7 +24,7 @@ var MyIPCmd = &cobra.Command{
 		publicIP := "Unavailable"
 		resp, err := http.Get("https://api.ipify.org")
 		if err == nil {
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			body, err := io.ReadAll(resp.Body)
 			if err == nil {
 				publicIP = string(body)
@@ -93,7 +93,7 @@ var PortCheckCmd = &cobra.Command{
 			}
 			return nil
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		fmt.Printf("❌ Port %s is IN USE (connection successful).\n", port)
 		return nil

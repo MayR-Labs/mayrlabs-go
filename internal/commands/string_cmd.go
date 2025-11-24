@@ -10,6 +10,8 @@ import (
 
 	"github.com/MayR-Labs/mayrlabs-go/internal/utils"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // StringCmd is the parent command for string utilities
@@ -51,7 +53,7 @@ var StringCaseCmd = &cobra.Command{
 		case "lower":
 			result = strings.ToLower(text)
 		case "title":
-			result = strings.Title(strings.ToLower(text))
+			result = cases.Title(language.English).String(strings.ToLower(text))
 		case "snake":
 			result = toSnakeCase(text)
 		case "kebab":
@@ -274,7 +276,7 @@ func toCamelCase(str string) string {
 		if i == 0 {
 			parts[i] = strings.ToLower(part)
 		} else {
-			parts[i] = strings.Title(strings.ToLower(part))
+			parts[i] = cases.Title(language.English).String(strings.ToLower(part))
 		}
 	}
 	return strings.Join(parts, "")

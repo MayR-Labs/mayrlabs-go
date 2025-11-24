@@ -125,7 +125,7 @@ var InstallCompletionCmd = &cobra.Command{
 				content, err := os.ReadFile(rcFile)
 				if err == nil {
 					if !strings.Contains(string(content), completionFile) {
-						if _, err := f.WriteString(fmt.Sprintf("\n# mayrlabs completion\n%s\n", sourceCmd)); err != nil {
+						if _, err := fmt.Fprintf(f, "\n# mayrlabs completion\n%s\n", sourceCmd); err != nil {
 							fmt.Printf("⚠️  Failed to write to RC file: %v\n", err)
 						} else {
 							fmt.Printf("✅ Added source command to %s\n", rcFile)
