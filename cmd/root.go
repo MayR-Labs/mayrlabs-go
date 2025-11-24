@@ -8,12 +8,12 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "mayrlabs",
 	Short: "🧰 MayR Labs CLI - Streamline your development workflow",
-	Long: `MayR Labs CLI is a lightweight, cross-platform command-line tool 
-built with Go to streamline common development, configuration, and 
+	Long: `MayR Labs CLI is a lightweight, cross-platform command-line tool
+built with Go to streamline common development, configuration, and
 automation tasks across projects.
 
-It provides developers with a unified interface for generating configs, 
-formatting code, managing environments, handling CI/CD, and keeping 
+It provides developers with a unified interface for generating configs,
+formatting code, managing environments, handling CI/CD, and keeping
 project structure consistent — all in seconds.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
@@ -51,6 +51,7 @@ func init() {
 
 	// New commands for v0.4.0
 	rootCmd.AddCommand(commands.RollDiceCmd)
+	rootCmd.AddCommand(commands.AliasSelfCmd)
 	rootCmd.AddCommand(commands.AliasCmd)
 	rootCmd.AddCommand(commands.UpgradeCmd)
 	rootCmd.AddCommand(commands.Base64Cmd)

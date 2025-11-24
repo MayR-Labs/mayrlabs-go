@@ -147,20 +147,8 @@ var GitPruneStaleCmd = &cobra.Command{
 			branchesToDelete = selected
 		}
 
-		// Generate PIN for confirmation
-		pin, err := utils.GeneratePIN()
-		if err != nil {
-			return fmt.Errorf("failed to generate PIN: %w", err)
-		}
-
-		// Display PIN and ask for confirmation
-		fmt.Printf("\n🔐 To confirm deletion of %d branch(es), enter this PIN: %s\n", len(branchesToDelete), pin)
-		userPIN, err := utils.SurveyInput("Enter PIN to confirm", "")
-		if err != nil {
-			return err
-		}
-
-		if userPIN != pin {
+		// Confirm with PIN
+		if err := utils.ConfirmWithPIN(fmt.Sprintf("\n⚠️  To confirm deletion of %d branch(es), please enter the PIN below:", len(branchesToDelete))); err != nil {
 			fmt.Println("❌ Incorrect PIN. Operation aborted. No branches were deleted.")
 			return nil
 		}
