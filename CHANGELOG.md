@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.1.0] - 2025-11-24
+
+### Added
+
+- **Enhanced Alias Management:**
+  - New `mayrlabs alias` command with comprehensive subcommands
+  - `add-popular` - Add popular aliases for Git, Docker, System, Go, Node, etc.
+  - `register/unregister` - Manage shell configuration integration
+  - `disable/enable` - Toggle aliases without deleting them
+  - `edit/rename` - Modify existing aliases
+  - `remove` - Remove aliases with PIN confirmation
+
+### Changed
+
+- **Command Renames:**
+  - Renamed `mayrlabs alias` to `mayrlabs alias-self` to avoid conflict with new alias manager
+  - Renamed `mayrlabs alias-list` to `mayrlabs alias list`
+  - Renamed `mayrlabs alias-clear` to `mayrlabs alias remove` (with multi-select)
+
+- **Security:**
+  - Refactored PIN confirmation logic into a shared utility for consistent security across commands
+
 ## [v1.0.0] - 2025-10-27
 
 ### 🎉 First Stable Release

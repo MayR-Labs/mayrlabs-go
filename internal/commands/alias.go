@@ -581,17 +581,7 @@ var AliasAddPopularCmd = &cobra.Command{
 	Use:   "add-popular",
 	Short: "Add popular aliases",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		popularAliases := []Alias{
-			{Name: "gs", Command: "git status"},
-			{Name: "ga", Command: "git add ."},
-			{Name: "gc", Command: "git commit -m"},
-			{Name: "gp", Command: "git push"},
-			{Name: "gl", Command: "git pull"},
-			{Name: "gco", Command: "git checkout"},
-			{Name: "ll", Command: "ls -la"},
-			{Name: "cls", Command: "clear"},
-			{Name: "update", Command: "sudo apt update && sudo apt upgrade -y"},
-		}
+		popularAliases := GetPopularAliases()
 
 		options := []string{}
 		for _, a := range popularAliases {
