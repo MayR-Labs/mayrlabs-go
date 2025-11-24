@@ -290,7 +290,7 @@ mayrlabs env arrange
 # Format Go code
 mayrlabs format go
 
-# Format JavaScript code  
+# Format JavaScript code
 mayrlabs format javascript
 
 # Format Python code
@@ -310,137 +310,145 @@ mayrlabs git prune-stale
 
 ### 🧱 General Commands
 
-| Command                             | Description                                                            |
-| ----------------------------------- | ---------------------------------------------------------------------- |
-| `mayrlabs uuid`                     | Generate UUID v4 with optional --copy flag to copy to clipboard       |
-| `mayrlabs ulid`                     | Generate ULID with optional --copy flag to copy to clipboard          |
-| `mayrlabs password [length]`        | Generate a random password of specified length (default: 16)           |
-| `mayrlabs random-int`               | Generate a random integer (interactive mode if no args)                |
-| `mayrlabs hash [string]`            | Generate hash of a string using md5, sha1, or sha256                   |
-| `mayrlabs hash-file [file]`         | Generate hash of a file (interactive mode if no args)                  |
-| `mayrlabs create-keystore`          | Create a new keystore interactively (uses PKCS12 format)               |
-| `mayrlabs dns-clear`                | Clear the DNS cache (choose macOS, Linux, or Windows)                  |
-| `mayrlabs ci`                       | Generate CI/CD workflow YAML for your language and VCS                 |
-| `mayrlabs format [language]`        | Format project files for a given language (interactive if omitted)     |
-| `mayrlabs add-license`              | Create a LICENSE file with author, year, and optional URL              |
-| `mayrlabs editor-config [language]` | Generate `.editorconfig` for a specific language (interactive mode)    |
-| `mayrlabs roll-dice [n]`            | Roll n dice and display results with total and average                 |
-| `mayrlabs quote`                    | Display a random motivational quote for developers                     |
-| `mayrlabs version`                  | Display the version of mayrlabs CLI                                    |
-| `mayrlabs visit`                    | Open the MayR Labs website in your browser                             |
-| `mayrlabs github`                   | Open the mayrlabs-go GitHub repository in your browser                 |
+| Command                             | Description                                                         |
+| ----------------------------------- | ------------------------------------------------------------------- |
+| `mayrlabs uuid`                     | Generate UUID v4 with optional --copy flag to copy to clipboard     |
+| `mayrlabs ulid`                     | Generate ULID with optional --copy flag to copy to clipboard        |
+| `mayrlabs password [length]`        | Generate a random password of specified length (default: 16)        |
+| `mayrlabs random-int`               | Generate a random integer (interactive mode if no args)             |
+| `mayrlabs hash [string]`            | Generate hash of a string using md5, sha1, or sha256                |
+| `mayrlabs hash-file [file]`         | Generate hash of a file (interactive mode if no args)               |
+| `mayrlabs create-keystore`          | Create a new keystore interactively (uses PKCS12 format)            |
+| `mayrlabs dns-clear`                | Clear the DNS cache (choose macOS, Linux, or Windows)               |
+| `mayrlabs ci`                       | Generate CI/CD workflow YAML for your language and VCS              |
+| `mayrlabs format [language]`        | Format project files for a given language (interactive if omitted)  |
+| `mayrlabs add-license`              | Create a LICENSE file with author, year, and optional URL           |
+| `mayrlabs editor-config [language]` | Generate `.editorconfig` for a specific language (interactive mode) |
+| `mayrlabs roll-dice [n]`            | Roll n dice and display results with total and average              |
+| `mayrlabs quote`                    | Display a random motivational quote for developers                  |
+| `mayrlabs version`                  | Display the version of mayrlabs CLI                                 |
+| `mayrlabs visit`                    | Open the MayR Labs website in your browser                          |
+| `mayrlabs github`                   | Open the mayrlabs-go GitHub repository in your browser              |
 
 ---
 
 ### 🔧 System Commands
 
-| Command                     | Description                                                       |
-| --------------------------- | ----------------------------------------------------------------- |
-| `mayrlabs upgrade`          | Upgrade mayrlabs to the latest version                            |
+| Command            | Description                            |
+| ------------------ | -------------------------------------- |
+| `mayrlabs upgrade` | Upgrade mayrlabs to the latest version |
 
 ---
 
 ### 🔐 Encoding/Decoding Commands
 
-| Command                                    | Description                                                  |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| `mayrlabs base64 encode/decode [string]`   | Encode or decode a string using base64 with optional --copy flag |
-| `mayrlabs base64-file [path]`              | Encode a file to base64 with optional --copy flag           |
-| `mayrlabs base64-decode-to-file [string]`  | Decode base64 string and write to a file                    |
+| Command                                   | Description                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| `mayrlabs base64 encode/decode [string]`  | Encode or decode a string using base64 with optional --copy flag |
+| `mayrlabs base64-file [path]`             | Encode a file to base64 with optional --copy flag                |
+| `mayrlabs base64-decode-to-file [string]` | Decode base64 string and write to a file                         |
 
 ---
 
 ### 🌿 Git Commands
 
-| Command                    | Description                                        |
-| -------------------------- | -------------------------------------------------- |
-| `mayrlabs git`             | Show available Git-related commands                |
-| `mayrlabs git prune-stale` | Delete all local branches not found on the remote  |
+| Command                    | Description                                       |
+| -------------------------- | ------------------------------------------------- |
+| `mayrlabs git`             | Show available Git-related commands               |
+| `mayrlabs git prune-stale` | Delete all local branches not found on the remote |
 
 ---
 
 ### 🔐 ENV Commands
 
-| Command                                | Description                                                                           |
-| -------------------------------------- | ------------------------------------------------------------------------------------- |
-| `mayrlabs env`                         | List available environment commands                                                   |
+| Command                                | Description                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `mayrlabs env`                         | List available environment commands                                                  |
 | `mayrlabs env update-example [source]` | Sync `.env.example` with `.env` or `.env.staging`. Creates `.env.example` if missing |
-| `mayrlabs env validate`                | Check for missing keys, invalid values, or duplicated variables                       |
-| `mayrlabs env arrange [file]`          | Sort and group environment keys by prefix (e.g., `APP_*`, `DB_*`)                     |
+| `mayrlabs env validate`                | Check for missing keys, invalid values, or duplicated variables                      |
+| `mayrlabs env arrange [file]`          | Sort and group environment keys by prefix (e.g., `APP_*`, `DB_*`)                    |
 
 ---
 
 ### 📝 CHANGELOG Commands
 
-| Command                                         | Description                                           |
-| ----------------------------------------------- | ----------------------------------------------------- |
-| `mayrlabs changelog`                            | Display all changelog commands                        |
-| `mayrlabs changelog create [--force]`           | Create or overwrite `CHANGELOG.md`                    |
-| `mayrlabs changelog record [version] [summary]` | Add a new entry to `CHANGELOG.md` (supports `--wip`)  |
+| Command                                         | Description                                          |
+| ----------------------------------------------- | ---------------------------------------------------- |
+| `mayrlabs changelog`                            | Display all changelog commands                       |
+| `mayrlabs changelog create [--force]`           | Create or overwrite `CHANGELOG.md`                   |
+| `mayrlabs changelog record [version] [summary]` | Add a new entry to `CHANGELOG.md` (supports `--wip`) |
 
 ---
 
 ### 🐦 Flutter Commands
 
-| Command                           | Description                                                         |
-| --------------------------------- | ------------------------------------------------------------------- |
-| `mayrlabs flutter`                | List Flutter-related commands                                       |
+| Command                           | Description                                                        |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `mayrlabs flutter`                | List Flutter-related commands                                      |
 | `mayrlabs flutter create-scripts` | Add useful build scripts to `scripts/` (IPA, APK, AppBundle, etc.) |
 
 ---
 
 ### 🐘 PHP Commands
 
-| Command               | Description                   |
-| --------------------- | ----------------------------- |
-| `mayrlabs php`        | List PHP commands             |
-| `mayrlabs php cs-fix` | Run PHP CodeSniffer/CS-Fixer  |
-| `mayrlabs php lint`   | Lint PHP files                |
+| Command               | Description                  |
+| --------------------- | ---------------------------- |
+| `mayrlabs php`        | List PHP commands            |
+| `mayrlabs php cs-fix` | Run PHP CodeSniffer/CS-Fixer |
+| `mayrlabs php lint`   | Lint PHP files               |
 
 ---
 
 ### ⚡ JavaScript Commands
 
-| Command                      | Description                                             |
-| ---------------------------- | ------------------------------------------------------- |
-| `mayrlabs js`                | List JavaScript commands                                |
-| `mayrlabs js setup-prettier` | Install and configure Prettier with `.prettierrc.yaml`  |
-| `mayrlabs js pretty`         | Run Prettier on the project                             |
+| Command                      | Description                                            |
+| ---------------------------- | ------------------------------------------------------ |
+| `mayrlabs js`                | List JavaScript commands                               |
+| `mayrlabs js setup-prettier` | Install and configure Prettier with `.prettierrc.yaml` |
+| `mayrlabs js pretty`         | Run Prettier on the project                            |
 
 ---
 
 ### 🤖 AI Commands
 
-| Command                               | Description                                                           |
-| ------------------------------------- | --------------------------------------------------------------------- |
-| `mayrlabs ai-setup`                   | Setup Gemini API key for AI features                                  |
-| `mayrlabs ai [query...]`              | Query the AI using Gemini (supports multiline input)                  |
-| `mayrlabs ai-file [path]`             | Send the content of a text-based file to the AI                       |
-| `mayrlabs ai-alias [name]`            | Create a permanent alias for 'mayrlabs ai' command                    |
-| `mayrlabs ai-clear`                   | Clear the stored Gemini API key                                       |
+| Command                    | Description                                          |
+| -------------------------- | ---------------------------------------------------- |
+| `mayrlabs ai-setup`        | Setup Gemini API key for AI features                 |
+| `mayrlabs ai [query...]`   | Query the AI using Gemini (supports multiline input) |
+| `mayrlabs ai-file [path]`  | Send the content of a text-based file to the AI      |
+| `mayrlabs ai-alias [name]` | Create a permanent alias for 'mayrlabs ai' command   |
+| `mayrlabs ai-clear`        | Clear the stored Gemini API key                      |
 
 ---
 
 ### 📝 Session Management Commands
 
-| Command                                  | Description                                                        |
-| ---------------------------------------- | ------------------------------------------------------------------ |
-| `mayrlabs session-start [summary]`       | Start an interactive development session                           |
-| `mayrlabs sessions`                      | List and manage sessions                                           |
-| `mayrlabs session-clear`                 | Clear all sessions with PIN confirmation                           |
-| `mayrlabs session-prune [days]`          | Delete sessions older than specified days                          |
-| `mayrlabs secure-session-start [summary]`| Start an encrypted interactive development session                 |
-| `mayrlabs secure-sessions`               | List and manage encrypted secure sessions                          |
+| Command                                   | Description                                        |
+| ----------------------------------------- | -------------------------------------------------- |
+| `mayrlabs session-start [summary]`        | Start an interactive development session           |
+| `mayrlabs sessions`                       | List and manage sessions                           |
+| `mayrlabs session-clear`                  | Clear all sessions with PIN confirmation           |
+| `mayrlabs session-prune [days]`           | Delete sessions older than specified days          |
+| `mayrlabs secure-session-start [summary]` | Start an encrypted interactive development session |
+| `mayrlabs secure-sessions`                | List and manage encrypted secure sessions          |
 
 ---
 
 ### 🏷️ Alias Management Commands
 
-| Command                     | Description                                               |
-| --------------------------- | --------------------------------------------------------- |
-| `mayrlabs alias [name]`     | Create a permanent shell alias for mayrlabs command       |
-| `mayrlabs alias-list`       | List all mayrlabs aliases                                 |
-| `mayrlabs alias-clear`      | Clear all mayrlabs aliases with confirmation              |
+| Command                      | Description                                         |
+| ---------------------------- | --------------------------------------------------- |
+| `mayrlabs alias list`        | List all mayrlabs aliases                           |
+| `mayrlabs alias add`         | Add a new alias interactively                       |
+| `mayrlabs alias remove`      | Remove an alias interactively                       |
+| `mayrlabs alias edit`        | Edit an existing alias                              |
+| `mayrlabs alias rename`      | Rename an alias                                     |
+| `mayrlabs alias disable`     | Disable an alias                                    |
+| `mayrlabs alias enable`      | Enable an alias                                     |
+| `mayrlabs alias add-popular` | Add popular aliases (Git, Docker, System, etc.)     |
+| `mayrlabs alias register`    | Register alias file in shell configuration          |
+| `mayrlabs alias unregister`  | Unregister alias file from shell configuration      |
+| `mayrlabs alias-self`        | Create a permanent shell alias for mayrlabs command |
 
 ---
 

@@ -11,9 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// AliasCmd creates a permanent alias for mayrlabs command
-var AliasCmd = &cobra.Command{
-	Use:   "alias [alias-name]",
+// AliasSelfCmd creates a permanent alias for mayrlabs command
+var AliasSelfCmd = &cobra.Command{
+	Use:   "alias-self [alias-name]",
 	Short: "Create a permanent alias for mayrlabs command",
 	Long:  "Create a shell alias for mayrlabs command in your shell configuration file",
 	Args:  cobra.MaximumNArgs(1),

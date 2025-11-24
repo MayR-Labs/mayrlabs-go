@@ -693,23 +693,8 @@ var SessionClearCmd = &cobra.Command{
 			return nil
 		}
 
-		fmt.Printf("⚠️  This will delete %d session(s)\n", count)
-
-		// Generate PIN
-		pin, err := utils.GeneratePIN()
-		if err != nil {
-			return fmt.Errorf("failed to generate PIN: %w", err)
-		}
-
-		fmt.Printf("🔐 Enter PIN to confirm: %s\n", pin)
-
-		// Get user input
-		userPin, err := utils.SurveyInput("Enter PIN:", "")
-		if err != nil {
-			return err
-		}
-
-		if userPin != pin {
+		// Confirm with PIN
+		if err := utils.ConfirmWithPIN(fmt.Sprintf("⚠️  This will delete %d session(s)", count)); err != nil {
 			fmt.Println("❌ Invalid PIN. Operation cancelled")
 			return nil
 		}
@@ -788,21 +773,8 @@ var SessionPruneCmd = &cobra.Command{
 		}
 		fmt.Println()
 
-		// Generate PIN
-		pin, err := utils.GeneratePIN()
-		if err != nil {
-			return fmt.Errorf("failed to generate PIN: %w", err)
-		}
-
-		fmt.Printf("🔐 Enter PIN to confirm: %s\n", pin)
-
-		// Get user input
-		userPin, err := utils.SurveyInput("Enter PIN:", "")
-		if err != nil {
-			return err
-		}
-
-		if userPin != pin {
+		// Confirm with PIN
+		if err := utils.ConfirmWithPIN(""); err != nil {
 			fmt.Println("❌ Invalid PIN. Operation cancelled")
 			return nil
 		}

@@ -226,3 +226,25 @@ func PromptMultiSelect(message string, options []string) ([]string, error) {
 	err := survey.AskOne(prompt, &result)
 	return result, err
 }
+
+// ConfirmWithPIN generates a PIN, displays it, and asks the user to confirm by entering it.
+func ConfirmWithPIN(message string) error {
+	pin, err := GeneratePIN()
+	if err != nil {
+		return fmt.Errorf("failed to generate PIN: %w", err)
+	}
+
+	fmt.Printf("%s\n", message)
+	fmt.Printf("🔐 Confirmation PIN: %s\n\n", pin)
+
+	userInput, err := SurveyInput("Enter the PIN to confirm:", "")
+	if err != nil {
+		return err
+	}
+
+	if userInput != pin {
+		return fmt.Errorf("incorrect PIN. Operation cancelled")
+	}
+
+	return nil
+}
