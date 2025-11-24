@@ -124,11 +124,11 @@ var AliasRegisterCmd = &cobra.Command{
 			}
 
 			if _, err := f.WriteString("\n" + sourceLine + "\n"); err != nil {
-				f.Close()
+				_ = f.Close()
 				fmt.Printf("❌ Failed to write to %s: %v\n", filepath.Base(file), err)
 				continue
 			}
-			f.Close()
+			_ = f.Close()
 			fmt.Printf("✅ Registered in %s\n", filepath.Base(file))
 		}
 

@@ -1,9 +1,7 @@
 package commands
 
 import (
-	"crypto/rand"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -185,14 +183,4 @@ var AliasClearCmd = &cobra.Command{
 
 		return nil
 	},
-}
-
-// generatePIN generates a random 6-digit PIN
-func generatePIN() string {
-	pin := ""
-	for i := 0; i < 6; i++ {
-		num, _ := rand.Int(rand.Reader, big.NewInt(10))
-		pin += fmt.Sprintf("%d", num.Int64())
-	}
-	return pin
 }
