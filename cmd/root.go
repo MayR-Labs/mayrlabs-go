@@ -84,4 +84,16 @@ func init() {
 	rootCmd.AddCommand(commands.FlutterCmd)
 	rootCmd.AddCommand(commands.PHPCmd)
 	rootCmd.AddCommand(commands.JSCmd)
+
+	// New commands for v1.2.0
+	rootCmd.AddCommand(commands.MyIPCmd)
+	rootCmd.AddCommand(commands.PortCheckCmd)
+	rootCmd.AddCommand(commands.JWTDecodeCmd)
+	rootCmd.AddCommand(commands.QRCmd)
+	rootCmd.AddCommand(commands.RegexCmd)
+	rootCmd.AddCommand(commands.BaseCmd)
+	rootCmd.AddCommand(commands.StringCmd)
+	rootCmd.AddCommand(commands.TimerCmd)
+	rootCmd.AddCommand(commands.LOCCmd)
+	rootCmd.AddCommand(commands.InstallCompletionCmd)
 }

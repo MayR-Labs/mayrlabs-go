@@ -329,7 +329,16 @@ mayrlabs git prune-stale
 | `mayrlabs version`                  | Display the version of mayrlabs CLI                                 |
 | `mayrlabs visit`                    | Open the MayR Labs website in your browser                          |
 | `mayrlabs github`                   | Open the mayrlabs-go GitHub repository in your browser              |
-
+| `mayrlabs myip`                     | Show your public and local IP addresses                             |
+| `mayrlabs port-check [port]`        | Check if a port is open or in use on localhost                      |
+| `mayrlabs jwt-decode [token]`       | Decode a JWT token (Header and Payload)                             |
+| `mayrlabs qr [text]`                | Generate a QR code (optional save to file)                          |
+| `mayrlabs regex [pattern] [text]`   | Test a regex pattern against a string                               |
+| `mayrlabs base [from] [num] [to]`   | Convert numbers between bases (2-36)                                |
+| `mayrlabs timer [duration]`         | Start a countdown timer (e.g., 15s, 1.5m)                           |
+| `mayrlabs loc [path]`               | Count lines of code grouped by language                             |
+| `mayrlabs install-completion`       | Install shell autocompletion (zsh, bash, fish, powershell)          |
+| `mayrlabs string`                   | String utilities (case, escape, reverse, mask, length, slugify)     |
 ---
 
 ### 🔧 System Commands
