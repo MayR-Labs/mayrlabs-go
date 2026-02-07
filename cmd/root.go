@@ -96,4 +96,5 @@ func init() {
 	rootCmd.AddCommand(commands.TimerCmd)
 	rootCmd.AddCommand(commands.LOCCmd)
 	rootCmd.AddCommand(commands.InstallCompletionCmd)
+	rootCmd.AddCommand(commands.SSHCmd)
 }

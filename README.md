@@ -32,6 +32,7 @@ wget -qO- https://raw.githubusercontent.com/MayR-Labs/mayrlabs-go/main/install.s
 ```
 
 The script automatically:
+
 - Detects your operating system and architecture
 - Downloads the latest release
 - Installs the binary to an appropriate location
@@ -76,6 +77,7 @@ source ~/.bashrc  # or ~/.zshrc, ~/.profile depending on your shell
 Download the latest release for your platform from the [Releases page](https://github.com/MayR-Labs/mayrlabs-go/releases):
 
 **Linux (AMD64):**
+
 ```bash
 curl -L https://github.com/MayR-Labs/mayrlabs-go/releases/latest/download/mayrlabs-linux-amd64 -o mayrlabs
 chmod +x mayrlabs
@@ -83,6 +85,7 @@ sudo mv mayrlabs /usr/local/bin/
 ```
 
 **macOS (Apple Silicon):**
+
 ```bash
 curl -L https://github.com/MayR-Labs/mayrlabs-go/releases/latest/download/mayrlabs-darwin-arm64 -o mayrlabs
 chmod +x mayrlabs
@@ -339,6 +342,7 @@ mayrlabs git prune-stale
 | `mayrlabs loc [path]`               | Count lines of code grouped by language                             |
 | `mayrlabs install-completion`       | Install shell autocompletion (zsh, bash, fish, powershell)          |
 | `mayrlabs string`                   | String utilities (case, escape, reverse, mask, length, slugify)     |
+
 ---
 
 ### 🔧 System Commands
@@ -348,6 +352,23 @@ mayrlabs git prune-stale
 | `mayrlabs upgrade` | Upgrade mayrlabs to the latest version |
 
 ---
+
+### 🔑 SSH Commands
+
+| Command                     | Description                                            |
+| --------------------------- | ------------------------------------------------------ |
+| `mayrlabs ssh config list`  | List SSH config hosts                                  |
+| `mayrlabs ssh config add`   | Add a new SSH host config interactively                |
+| `mayrlabs ssh config edit`  | Edit an existing SSH host config                       |
+| `mayrlabs ssh config remove`| Remove an SSH host config interactively                |
+| `mayrlabs ssh config export`| Export selected config entries to JSON                 |
+| `mayrlabs ssh config import`| Import config entries from JSON                        |
+| `mayrlabs ssh config connect`| Connect to a host from your config                    |
+| `mayrlabs ssh connect`      | Connect to a host directly (interactive)               |
+| `mayrlabs ssh hosts list`   | List known hosts                                       |
+| `mayrlabs ssh hosts remove` | Remove a known host                                    |
+| `mayrlabs ssh keys list`    | List SSH keys (manage, copy, delete, rename)           |
+| `mayrlabs ssh keys create`  | Create a new SSH key                                   |
 
 ### 🔐 Encoding/Decoding Commands
 
