@@ -18,6 +18,7 @@ go.work
 
 # Build artifacts
 mayrlabs
+mayrlabs-go
 mayrlabs-cli
 dist/
 build/
