@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,13 +20,148 @@ import (
 var SSHCmd = &cobra.Command{
 	Use:   "ssh",
 	Short: "Manage SSH configurations, keys, and connections",
-	Long:  "A comprehensive tool for managing your SSH config, keys, known_hosts and connections.",
+	Long:  "A comprehensive tool for managing your SSH config, keys, known_hosts and connections.\nRunning without arguments opens an interactive menu.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return runSSHInteractive()
+		}
+		return cmd.Help()
+	},
+}
+
+func runSSHInteractive() error {
+	for {
+		action := ""
+		prompt := &survey.Select{
+			Message: "SSH Management:",
+			Options: []string{"Connect", "Config", "Keys", "Hosts", "Exit"},
+		}
+		if err := survey.AskOne(prompt, &action); err != nil {
+			return err
+		}
+
+		switch action {
+		case "Connect":
+			if err := SSHConnectCmd.RunE(SSHConnectCmd, []string{}); err != nil {
+				fmt.Printf("Error: %v\n", err)
+			}
+		case "Config":
+			if err := runSSHConfigInteractive(); err != nil {
+				fmt.Printf("Error: %v\n", err)
+			}
+		case "Keys":
+			if err := runSSHKeysInteractive(); err != nil {
+				fmt.Printf("Error: %v\n", err)
+			}
+		case "Hosts":
+			if err := runSSHHostsInteractive(); err != nil {
+				fmt.Printf("Error: %v\n", err)
+			}
+		case "Exit":
+			return nil
+		}
+	}
+}
+
+func runSSHConfigInteractive() error {
+	for {
+		action := ""
+		prompt := &survey.Select{
+			Message: "SSH Config Management:",
+			Options: []string{"List", "Add", "Edit", "Remove", "Export", "Import", "Connect", "Back"},
+		}
+		if err := survey.AskOne(prompt, &action); err != nil {
+			return err
+		}
+
+		var err error
+		switch action {
+		case "List":
+			err = SSHConfigListCmd.RunE(SSHConfigListCmd, []string{})
+		case "Add":
+			err = SSHConfigAddCmd.RunE(SSHConfigAddCmd, []string{})
+		case "Edit":
+			err = SSHConfigEditCmd.RunE(SSHConfigEditCmd, []string{})
+		case "Remove":
+			err = SSHConfigRemoveCmd.RunE(SSHConfigRemoveCmd, []string{})
+		case "Export":
+			err = SSHConfigExportCmd.RunE(SSHConfigExportCmd, []string{})
+		case "Import":
+			err = SSHConfigImportCmd.RunE(SSHConfigImportCmd, []string{})
+		case "Connect":
+			err = SSHConfigConnectCmd.RunE(SSHConfigConnectCmd, []string{})
+		case "Back":
+			return nil
+		}
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
+	}
+}
+
+func runSSHKeysInteractive() error {
+	for {
+		action := ""
+		prompt := &survey.Select{
+			Message: "SSH Keys Management:",
+			Options: []string{"List", "Create", "Back"},
+		}
+		if err := survey.AskOne(prompt, &action); err != nil {
+			return err
+		}
+
+		var err error
+		switch action {
+		case "List":
+			err = SSHKeysListCmd.RunE(SSHKeysListCmd, []string{})
+		case "Create":
+			err = SSHKeysCreateCmd.RunE(SSHKeysCreateCmd, []string{})
+		case "Back":
+			return nil
+		}
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
+	}
+}
+
+func runSSHHostsInteractive() error {
+	for {
+		action := ""
+		prompt := &survey.Select{
+			Message: "Known Hosts Management:",
+			Options: []string{"List", "Remove", "Back"},
+		}
+		if err := survey.AskOne(prompt, &action); err != nil {
+			return err
+		}
+
+		var err error
+		switch action {
+		case "List":
+			err = SSHHostsListCmd.RunE(SSHHostsListCmd, []string{})
+		case "Remove":
+			err = SSHHostsRemoveCmd.RunE(SSHHostsRemoveCmd, []string{})
+		case "Back":
+			return nil
+		}
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
+	}
 }
 
 // SSHConfigCmd represents the ssh config command category
 var SSHConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage SSH config file (~/.ssh/config)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Also interactive if no usage
+		if len(args) == 0 {
+			return runSSHConfigInteractive()
+		}
+		return cmd.Help()
+	},
 }
 
 // SSHConfigListCmd lists entries in ~/.ssh/config
@@ -45,9 +179,13 @@ var SSHConfigListCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-		fmt.Fprintln(w, "NAME\tHOSTNAME\tUSER\tPORT\tIDENTITY FILE")
+		if _, err := fmt.Fprintln(w, "NAME\tHOSTNAME\tUSER\tPORT\tIDENTITY FILE"); err != nil {
+			return err
+		}
 		for _, e := range entries {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", e.Name, e.HostName, e.User, e.Port, e.IdentityFile)
+			if _, err := fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", e.Name, e.HostName, e.User, e.Port, e.IdentityFile); err != nil {
+				return err
+			}
 		}
 		return w.Flush()
 	},
@@ -123,7 +261,9 @@ var SSHConfigAddCmd = &cobra.Command{
 		prompt := &survey.Confirm{
 			Message: "Add this entry to config?",
 		}
-		survey.AskOne(prompt, &confirm)
+		if err := survey.AskOne(prompt, &confirm); err != nil {
+			return err
+		}
 
 		if confirm {
 			path, err := utils.GetSSHConfigPath()
@@ -167,6 +307,11 @@ var SSHConfigRemoveCmd = &cobra.Command{
 			options = append(options, e.Name)
 		}
 
+		if len(options) == 0 {
+			fmt.Println("No hosts found.")
+			return nil
+		}
+
 		var selected []string
 		prompt := &survey.MultiSelect{
 			Message: "Select hosts to remove:",
@@ -186,7 +331,9 @@ var SSHConfigRemoveCmd = &cobra.Command{
 		confirmPrompt := &survey.Confirm{
 			Message: fmt.Sprintf("Are you sure you want to remove %d hosts?", len(selected)),
 		}
-		survey.AskOne(confirmPrompt, &confirm)
+		if err := survey.AskOne(confirmPrompt, &confirm); err != nil {
+			return err
+		}
 
 		if confirm {
 			for _, name := range selected {
@@ -217,6 +364,11 @@ var SSHConfigEditCmd = &cobra.Command{
 		var options []string
 		for _, e := range entries {
 			options = append(options, e.Name)
+		}
+
+		if len(options) == 0 {
+			fmt.Println("No hosts found.")
+			return nil
 		}
 
 		var selectedHost string
@@ -286,8 +438,7 @@ var SSHConfigEditCmd = &cobra.Command{
 			return err
 		}
 
-		// Update logic: Remove old, add new (to keep it simple for now, though rewriting in place is better)
-		// We'll update properties in memory and rewrite the whole file
+		// Update logic
 		for i, e := range entries {
 			if e.Name == selectedHost {
 				entries[i].HostName = answers.HostName
@@ -328,6 +479,11 @@ var SSHConfigExportCmd = &cobra.Command{
 			options = append(options, e.Name)
 		}
 
+		if len(options) == 0 {
+			fmt.Println("No hosts found.")
+			return nil
+		}
+
 		var selected []string
 		prompt := &survey.MultiSelect{
 			Message: "Select hosts to export:",
@@ -352,7 +508,9 @@ var SSHConfigExportCmd = &cobra.Command{
 		filePrompt := &survey.Input{
 			Message: "Enter filename (e.g. hosts.json):",
 		}
-		survey.AskOne(filePrompt, &filename)
+		if err := survey.AskOne(filePrompt, &filename); err != nil {
+			return err
+		}
 
 		if filename == "" {
 			return fmt.Errorf("filename required")
@@ -363,7 +521,7 @@ var SSHConfigExportCmd = &cobra.Command{
 			return err
 		}
 
-		err = ioutil.WriteFile(filename, data, 0644)
+		err = os.WriteFile(filename, data, 0644)
 		if err != nil {
 			return err
 		}
@@ -381,9 +539,11 @@ var SSHConfigImportCmd = &cobra.Command{
 		filePrompt := &survey.Input{
 			Message: "Enter filename to import:",
 		}
-		survey.AskOne(filePrompt, &filename)
+		if err := survey.AskOne(filePrompt, &filename); err != nil {
+			return err
+		}
 
-		data, err := ioutil.ReadFile(filename)
+		data, err := os.ReadFile(filename)
 		if err != nil {
 			return err
 		}
@@ -400,7 +560,9 @@ var SSHConfigImportCmd = &cobra.Command{
 		prompt := &survey.Confirm{
 			Message: "Import these entries?",
 		}
-		survey.AskOne(prompt, &confirm)
+		if err := survey.AskOne(prompt, &confirm); err != nil {
+			return err
+		}
 
 		if confirm {
 			path, err := utils.GetSSHConfigPath()
@@ -408,10 +570,6 @@ var SSHConfigImportCmd = &cobra.Command{
 				return err
 			}
 			for _, entry := range imports {
-				// Naive check for duplicates could be added, but for now we append
-				// Better: check if name exists
-				// We already have AddSSHConfigEntry which appends
-				// Ideally we shouldn't add duplicates
 				if err := utils.AddSSHConfigEntry(path, entry); err != nil {
 					fmt.Printf("Failed to import %s: %s\n", entry.Name, err)
 				}
@@ -450,6 +608,11 @@ var SSHConfigConnectCmd = &cobra.Command{
 		var options []string
 		for _, e := range entries {
 			options = append(options, e.Name)
+		}
+
+		if len(options) == 0 {
+			fmt.Println("No hosts found.")
+			return nil
 		}
 
 		var selectedHost string
@@ -497,9 +660,15 @@ var SSHConnectCmd = &cobra.Command{
 		user := ""
 		port := "" // optional
 
-		survey.AskOne(&survey.Input{Message: "Host/IP:"}, &host)
-		survey.AskOne(&survey.Input{Message: "User (optional):"}, &user)
-		survey.AskOne(&survey.Input{Message: "Port (optional):"}, &port)
+		if err := survey.AskOne(&survey.Input{Message: "Host/IP:"}, &host); err != nil {
+			return err
+		}
+		if err := survey.AskOne(&survey.Input{Message: "User (optional):"}, &user); err != nil {
+			return err
+		}
+		if err := survey.AskOne(&survey.Input{Message: "Port (optional):"}, &port); err != nil {
+			return err
+		}
 
 		sshArgs := []string{}
 		if port != "" {
@@ -523,28 +692,32 @@ var SSHConnectCmd = &cobra.Command{
 var SSHHostsCmd = &cobra.Command{
 	Use:   "hosts",
 	Short: "Manage known_hosts",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Also interactive if no usage
+		if len(args) == 0 {
+			return runSSHHostsInteractive()
+		}
+		return cmd.Help()
+	},
 }
 
 var SSHHostsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List known hosts",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// This is tricky because known_hosts can be hashed.
-		// We can just dump the content or try to parse basic lines.
-		// Requirement says "Show the host(s)".
-		// Realistically, we can cat the file or use 'ssh-keygen -F' if we knew the host.
-		// Detailed parsing is complex. I'll read line by line and show the first part if not hashed.
 		path, err := utils.GetKnownHostsPath()
 		if err != nil {
 			return err
 		}
-		content, err := ioutil.ReadFile(path)
+		content, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
 		lines := strings.Split(string(content), "\n")
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-		fmt.Fprintln(w, "HOST/HASH\tKEY TYPE")
+		if _, err := fmt.Fprintln(w, "HOST/HASH\tKEY TYPE"); err != nil {
+			return err
+		}
 		for _, line := range lines {
 			if line == "" || strings.HasPrefix(line, "#") {
 				continue
@@ -555,7 +728,9 @@ var SSHHostsListCmd = &cobra.Command{
 				host := parts[0]
 				kType := parts[1]
 				// Marker handling (@revoked etc) not handled deeply here
-				fmt.Fprintf(w, "%s\t%s\n", host, kType)
+				if _, err := fmt.Fprintf(w, "%s\t%s\n", host, kType); err != nil {
+					return err
+				}
 			}
 		}
 		return w.Flush()
@@ -567,13 +742,17 @@ var SSHHostsRemoveCmd = &cobra.Command{
 	Short: "Remove a known host",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		hostName := ""
-		survey.AskOne(&survey.Input{Message: "Enter hostname to remove:"}, &hostName)
+		if err := survey.AskOne(&survey.Input{Message: "Enter hostname to remove:"}, &hostName); err != nil {
+			return err
+		}
 		if hostName == "" {
 			return nil
 		}
 
 		confirm := false
-		survey.AskOne(&survey.Confirm{Message: "Remove " + hostName + " from known_hosts?"}, &confirm)
+		if err := survey.AskOne(&survey.Confirm{Message: "Remove " + hostName + " from known_hosts?"}, &confirm); err != nil {
+			return err
+		}
 		if confirm {
 			return utils.RemoveKnownHost(hostName)
 		}
@@ -585,6 +764,13 @@ var SSHHostsRemoveCmd = &cobra.Command{
 var SSHKeysCmd = &cobra.Command{
 	Use:   "keys",
 	Short: "Manage SSH keys",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Also interactive if no usage
+		if len(args) == 0 {
+			return runSSHKeysInteractive()
+		}
+		return cmd.Help()
+	},
 }
 
 var SSHKeysListCmd = &cobra.Command{
@@ -623,11 +809,13 @@ var SSHKeysListCmd = &cobra.Command{
 			Message: "Choose action:",
 			Options: []string{"Copy Public Key", "Delete", "Change Passphrase", "Rename", "Cancel"},
 		}
-		survey.AskOne(actionPrompt, &action)
+		if err := survey.AskOne(actionPrompt, &action); err != nil {
+			return err
+		}
 
 		switch action {
 		case "Copy Public Key":
-			content, err := ioutil.ReadFile(selectedKey.PubPath)
+			content, err := os.ReadFile(selectedKey.PubPath)
 			if err != nil {
 				return err
 			}
@@ -638,10 +826,16 @@ var SSHKeysListCmd = &cobra.Command{
 			fmt.Println("✅ Public key copied to clipboard!")
 		case "Delete":
 			confirm := false
-			survey.AskOne(&survey.Confirm{Message: "Delete " + selectedKey.Name + " (private and public)?"}, &confirm)
+			if err := survey.AskOne(&survey.Confirm{Message: "Delete " + selectedKey.Name + " (private and public)?"}, &confirm); err != nil {
+				return err
+			}
 			if confirm {
-				os.Remove(selectedKey.Path)
-				os.Remove(selectedKey.PubPath)
+				if err := os.Remove(selectedKey.Path); err != nil {
+					return fmt.Errorf("failed to remove key: %w", err)
+				}
+				if err := os.Remove(selectedKey.PubPath); err != nil {
+					return fmt.Errorf("failed to remove pub key: %w", err)
+				}
 				fmt.Println("✅ Key deleted.")
 			}
 		case "Change Passphrase":
@@ -649,16 +843,24 @@ var SSHKeysListCmd = &cobra.Command{
 			c.Stdout = os.Stdout
 			c.Stderr = os.Stderr
 			c.Stdin = os.Stdin
-			c.Run()
+			if err := c.Run(); err != nil {
+				return err
+			}
 		case "Rename":
 			newName := ""
-			survey.AskOne(&survey.Input{Message: "New name:"}, &newName)
+			if err := survey.AskOne(&survey.Input{Message: "New name:"}, &newName); err != nil {
+				return err
+			}
 			if newName != "" {
 				sshDir := filepath.Dir(selectedKey.Path)
 				newPath := filepath.Join(sshDir, newName)
 				newPub := newPath + ".pub"
-				os.Rename(selectedKey.Path, newPath)
-				os.Rename(selectedKey.PubPath, newPub)
+				if err := os.Rename(selectedKey.Path, newPath); err != nil {
+					return fmt.Errorf("failed to rename key: %w", err)
+				}
+				if err := os.Rename(selectedKey.PubPath, newPub); err != nil {
+					return fmt.Errorf("failed to rename pub key: %w", err)
+				}
 				fmt.Println("✅ Key renamed.")
 			}
 		}
@@ -671,27 +873,37 @@ var SSHKeysCreateCmd = &cobra.Command{
 	Short: "Create a new SSH key",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		identifier := ""
-		survey.AskOne(&survey.Input{Message: "Identifier (e.g. github_work):"}, &identifier)
+		if err := survey.AskOne(&survey.Input{Message: "Identifier (e.g. github_work):"}, &identifier); err != nil {
+			return err
+		}
 		if identifier == "" {
 			return fmt.Errorf("identifier required")
 		}
 
 		typeChoice := ""
-		survey.AskOne(&survey.Select{
+		if err := survey.AskOne(&survey.Select{
 			Message: "Key Type:",
 			Options: []string{"ed25519", "rsa", "ecdsa"},
 			Default: "ed25519",
-		}, &typeChoice)
+		}, &typeChoice); err != nil {
+			return err
+		}
 
 		comment := ""
-		survey.AskOne(&survey.Input{Message: "Comment (optional):"}, &comment)
+		if err := survey.AskOne(&survey.Input{Message: "Comment (optional):"}, &comment); err != nil {
+			return err
+		}
 
 		passphrase := ""
-		survey.AskOne(&survey.Password{Message: "Passphrase (optional):"}, &passphrase)
+		if err := survey.AskOne(&survey.Password{Message: "Passphrase (optional):"}, &passphrase); err != nil {
+			return err
+		}
 
 		roundsStr := ""
 		rounds := 0
-		survey.AskOne(&survey.Input{Message: "KDF Rounds (optional, default 64 or 16 for ed25519):", Default: "64"}, &roundsStr)
+		if err := survey.AskOne(&survey.Input{Message: "KDF Rounds (optional, default 64 or 16 for ed25519):", Default: "64"}, &roundsStr); err != nil {
+			return err
+		}
 		if r, err := strconv.Atoi(roundsStr); err == nil {
 			rounds = r
 		}

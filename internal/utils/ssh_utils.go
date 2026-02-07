@@ -3,7 +3,6 @@ package utils
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -39,7 +38,9 @@ func ParseSSHConfig(path string) ([]SSHConfigEntry, error) {
 		}
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	var entries []SSHConfigEntry
 	var currentEntry *SSHConfigEntry
@@ -50,7 +51,8 @@ func ParseSSHConfig(path string) ([]SSHConfigEntry, error) {
 		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
 
-		if strings.HasPrefix(trimmed, "Host ") {
+		switch {
+		case strings.HasPrefix(trimmed, "Host "):
 			if currentEntry != nil {
 				currentEntry.RawContent = currentRaw
 				entries = append(entries, *currentEntry)
@@ -59,7 +61,7 @@ func ParseSSHConfig(path string) ([]SSHConfigEntry, error) {
 				Name: strings.TrimPrefix(trimmed, "Host "),
 			}
 			currentRaw = []string{line}
-		} else if currentEntry != nil {
+		case currentEntry != nil:
 			currentRaw = append(currentRaw, line)
 			parts := strings.Fields(trimmed)
 			if len(parts) >= 2 {
@@ -76,10 +78,9 @@ func ParseSSHConfig(path string) ([]SSHConfigEntry, error) {
 					currentEntry.IdentityFile = value
 				}
 			}
-		} else {
+		default:
 			// Lines before the first Host entry (globals or comments)
-			// For now we might lose them or attach them to a "global" entry if we wanted to be perfect.
-			// But for this specific task, we'll focus on Host entries.
+			// For now we ignore them as per previous logic, but satisfied lint "empty branch"
 		}
 	}
 
@@ -92,41 +93,51 @@ func ParseSSHConfig(path string) ([]SSHConfigEntry, error) {
 }
 
 // WriteSSHConfig writes entries back to the config file
-// Note: This is a simplified writer that appends new entries or rewrites.
-// For robust editing, we need to be careful not to destroy existing formatting excessively.
 func WriteSSHConfig(path string, entries []SSHConfigEntry) error {
-	// For now, simpler approach: Read valid existing, append if new, or rewrite all.
-	// Given the requirement to "Edit", rewriting seems necessary.
-
 	file, err := os.Create(path)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	w := bufio.NewWriter(file)
 	for _, entry := range entries {
 		if len(entry.RawContent) > 0 {
 			for _, line := range entry.RawContent {
-				fmt.Fprintln(w, line)
+				if _, err := fmt.Fprintln(w, line); err != nil {
+					return err
+				}
 			}
 		} else {
-			// Reconstruct if RawContent is empty (new entry)
-			fmt.Fprintf(w, "Host %s\n", entry.Name)
+			if _, err := fmt.Fprintf(w, "Host %s\n", entry.Name); err != nil {
+				return err
+			}
 			if entry.HostName != "" {
-				fmt.Fprintf(w, "  HostName %s\n", entry.HostName)
+				if _, err := fmt.Fprintf(w, "  HostName %s\n", entry.HostName); err != nil {
+					return err
+				}
 			}
 			if entry.User != "" {
-				fmt.Fprintf(w, "  User %s\n", entry.User)
+				if _, err := fmt.Fprintf(w, "  User %s\n", entry.User); err != nil {
+					return err
+				}
 			}
 			if entry.Port != "" {
-				fmt.Fprintf(w, "  Port %s\n", entry.Port)
+				if _, err := fmt.Fprintf(w, "  Port %s\n", entry.Port); err != nil {
+					return err
+				}
 			}
 			if entry.IdentityFile != "" {
-				fmt.Fprintf(w, "  IdentityFile %s\n", entry.IdentityFile)
+				if _, err := fmt.Fprintf(w, "  IdentityFile %s\n", entry.IdentityFile); err != nil {
+					return err
+				}
 			}
 		}
-		fmt.Fprintln(w, "") // Empty line between hosts
+		if _, err := fmt.Fprintln(w, ""); err != nil {
+			return err
+		}
 	}
 	return w.Flush()
 }
@@ -137,22 +148,36 @@ func AddSSHConfigEntry(path string, entry SSHConfigEntry) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	w := bufio.NewWriter(f)
-	fmt.Fprintln(w, "") // Ensure separation
-	fmt.Fprintf(w, "Host %s\n", entry.Name)
+	if _, err := fmt.Fprintln(w, ""); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "Host %s\n", entry.Name); err != nil {
+		return err
+	}
 	if entry.HostName != "" {
-		fmt.Fprintf(w, "  HostName %s\n", entry.HostName)
+		if _, err := fmt.Fprintf(w, "  HostName %s\n", entry.HostName); err != nil {
+			return err
+		}
 	}
 	if entry.User != "" {
-		fmt.Fprintf(w, "  User %s\n", entry.User)
+		if _, err := fmt.Fprintf(w, "  User %s\n", entry.User); err != nil {
+			return err
+		}
 	}
 	if entry.Port != "" {
-		fmt.Fprintf(w, "  Port %s\n", entry.Port)
+		if _, err := fmt.Fprintf(w, "  Port %s\n", entry.Port); err != nil {
+			return err
+		}
 	}
 	if entry.IdentityFile != "" {
-		fmt.Fprintf(w, "  IdentityFile %s\n", entry.IdentityFile)
+		if _, err := fmt.Fprintf(w, "  IdentityFile %s\n", entry.IdentityFile); err != nil {
+			return err
+		}
 	}
 	return w.Flush()
 }
@@ -212,7 +237,7 @@ func ListSSHKeys() ([]SSHKey, error) {
 	}
 	sshDir := filepath.Join(home, ".ssh")
 
-	files, err := ioutil.ReadDir(sshDir)
+	files, err := os.ReadDir(sshDir)
 	if err != nil {
 		return nil, err
 	}
