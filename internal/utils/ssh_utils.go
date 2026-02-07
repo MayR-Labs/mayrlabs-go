@@ -11,11 +11,15 @@ import (
 
 // SSHConfigEntry represents a host entry in ~/.ssh/config
 type SSHConfigEntry struct {
-	Name         string
-	HostName     string
-	User         string
-	Port         string
-	IdentityFile string
+	Name                         string
+	HostName                     string
+	User                         string
+	Port                         string
+	IdentityFile                 string
+	PreferredAuthentications     string
+	PubkeyAuthentication         string
+	PasswordAuthentication       string
+	KbdInteractiveAuthentication string
 	// Add other fields as needed, but these are the main ones
 	RawContent []string // Preserve comments and other options
 }
@@ -76,6 +80,14 @@ func ParseSSHConfig(path string) ([]SSHConfigEntry, error) {
 					currentEntry.Port = value
 				case "identityfile":
 					currentEntry.IdentityFile = value
+				case "preferredauthentications":
+					currentEntry.PreferredAuthentications = value
+				case "pubkeyauthentication":
+					currentEntry.PubkeyAuthentication = value
+				case "passwordauthentication":
+					currentEntry.PasswordAuthentication = value
+				case "kbdinteractiveauthentication":
+					currentEntry.KbdInteractiveAuthentication = value
 				}
 			}
 		default:
@@ -134,6 +146,26 @@ func WriteSSHConfig(path string, entries []SSHConfigEntry) error {
 					return err
 				}
 			}
+			if entry.PreferredAuthentications != "" {
+				if _, err := fmt.Fprintf(w, "  PreferredAuthentications %s\n", entry.PreferredAuthentications); err != nil {
+					return err
+				}
+			}
+			if entry.PubkeyAuthentication != "" {
+				if _, err := fmt.Fprintf(w, "  PubkeyAuthentication %s\n", entry.PubkeyAuthentication); err != nil {
+					return err
+				}
+			}
+			if entry.PasswordAuthentication != "" {
+				if _, err := fmt.Fprintf(w, "  PasswordAuthentication %s\n", entry.PasswordAuthentication); err != nil {
+					return err
+				}
+			}
+			if entry.KbdInteractiveAuthentication != "" {
+				if _, err := fmt.Fprintf(w, "  KbdInteractiveAuthentication %s\n", entry.KbdInteractiveAuthentication); err != nil {
+					return err
+				}
+			}
 		}
 		if _, err := fmt.Fprintln(w, ""); err != nil {
 			return err
@@ -176,6 +208,26 @@ func AddSSHConfigEntry(path string, entry SSHConfigEntry) error {
 	}
 	if entry.IdentityFile != "" {
 		if _, err := fmt.Fprintf(w, "  IdentityFile %s\n", entry.IdentityFile); err != nil {
+			return err
+		}
+	}
+	if entry.PreferredAuthentications != "" {
+		if _, err := fmt.Fprintf(w, "  PreferredAuthentications %s\n", entry.PreferredAuthentications); err != nil {
+			return err
+		}
+	}
+	if entry.PubkeyAuthentication != "" {
+		if _, err := fmt.Fprintf(w, "  PubkeyAuthentication %s\n", entry.PubkeyAuthentication); err != nil {
+			return err
+		}
+	}
+	if entry.PasswordAuthentication != "" {
+		if _, err := fmt.Fprintf(w, "  PasswordAuthentication %s\n", entry.PasswordAuthentication); err != nil {
+			return err
+		}
+	}
+	if entry.KbdInteractiveAuthentication != "" {
+		if _, err := fmt.Fprintf(w, "  KbdInteractiveAuthentication %s\n", entry.KbdInteractiveAuthentication); err != nil {
 			return err
 		}
 	}
