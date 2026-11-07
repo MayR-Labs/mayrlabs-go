@@ -46,5 +46,7 @@ __debug_bin
 
 # goreleaser
 .goreleaser.yml
-config.bat
 node_modules
+
+.env
+.env.local
